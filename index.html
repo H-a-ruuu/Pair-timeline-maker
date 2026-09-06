@@ -38,6 +38,7 @@
   --paper:#fffdfb;
   --border:#ecdff2;
   --line-color:#cbb3e6;
+  --dot-color:#a683c9;
   --shadow:0 4px 18px rgba(124,86,168,0.12);
   --shadow-soft:0 2px 9px rgba(124,86,168,0.08);
   --radius:18px;
@@ -158,8 +159,12 @@ button{font-family:inherit; cursor:pointer; border:none;}
 }
 .node-dot{
   width:16px; height:16px; border-radius:50%; flex-shrink:0; margin-top:6px;
-  background:radial-gradient(circle at 34% 30%, #ffffff, var(--accent) 55%, var(--accent-dark) 100%);
-  box-shadow:0 0 0 5px var(--accent-soft), 0 2px 7px rgba(124,86,168,.28);
+  background:var(--dot-color); position:relative;
+  box-shadow:0 0 0 5px rgba(255,255,255,0.55), 0 2px 7px rgba(0,0,0,.22);
+}
+.node-dot::after{
+  content:''; position:absolute; top:3px; left:4px; width:5px; height:5px; border-radius:50%;
+  background:rgba(255,255,255,0.8);
 }
 .rail-line{
   flex:1; width:3px; margin-top:8px; margin-bottom:2px; border-radius:3px;
@@ -173,7 +178,7 @@ button{font-family:inherit; cursor:pointer; border:none;}
   background:repeating-linear-gradient(to bottom, var(--line-color) 0, var(--line-color) 7px, transparent 7px, transparent 14px);
   border-radius:0;
 }
-#canvas.line-gradient .rail-line{background:linear-gradient(to bottom, var(--accent), var(--blush));}
+#canvas.line-gradient .rail-line{background:linear-gradient(to bottom, var(--dot-color), var(--line-color));}
 #canvas.line-arrow .rail-line::after{
   content:''; position:absolute; left:50%; bottom:-2px; transform:translateX(-50%);
   border-left:7px solid transparent; border-right:7px solid transparent;
@@ -256,8 +261,13 @@ button{font-family:inherit; cursor:pointer; border:none;}
 .no-image-slot{ padding:6px 0 2px; text-align:center; }
 .profile-fields{display:flex; flex-direction:column; gap:6px;}
 .p-name{font-weight:700; text-align:center;}
-.p-row{display:flex; flex-wrap:wrap; gap:4px;}
-.p-small{flex:1; min-width:0; font-size:11.5px;}
+.p-row{display:flex; flex-wrap:wrap; gap:4px; align-items:center;}
+.p-small{font-size:11.5px;}
+.p-age{flex:0 0 50px; width:50px; text-align:center;}
+.p-affiliation{flex:0 0 auto; width:56px; min-width:56px; max-width:128px; text-align:center; transition:width .08s ease;}
+.p-status-row{display:flex; align-items:center; gap:5px;}
+.p-status{flex:1; min-width:0;}
+.p-status-remove{width:20px; height:20px; font-size:10px;}
 .style-row{display:flex; align-items:center; gap:5px; justify-content:center; padding-top:2px;}
 .style-toggle{
   width:22px; height:22px; border-radius:6px; background:#fff; border:1px solid var(--border);
@@ -373,6 +383,8 @@ button{font-family:inherit; cursor:pointer; border:none;}
         <option value="arrow">화살표</option>
       </select>
     </label>
+    <input type="color" id="lineColorPicker" class="tiny-color" value="#cbb3e6" title="연결선 색상">
+    <input type="color" id="dotColorPicker" class="tiny-color" value="#a683c9" title="타임라인 동그라미 색상">
 
     <label class="toolbar-field">배경
       <select id="bgTypeSelect">
@@ -464,6 +476,8 @@ const DEFAULT_TITLE_COLORS = { profiles:'#7c56a8', relationships:'#5c9366', even
 let state = {
   globalFont:'Pretendard',
   lineStyle:'solid',
+  lineColor:'#cbb3e6',
+  dotColor:'#a683c9',
   bgType:'gradient',
   bgColor1:'#fdf5f8',
   bgColor2:'#eee3f6',
@@ -475,13 +489,38 @@ let state = {
 function uid(p){ return p+'_'+Math.random().toString(36).slice(2,9); }
 function esc(s){ return (s==null?'':String(s)).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
+/* 소속 입력칸 글자 길이에 맞춰 너비 자동 조절 */
+let _measureCanvas = null;
+function measureTextWidth(text, font){
+  if(!_measureCanvas) _measureCanvas = document.createElement('canvas');
+  const ctx = _measureCanvas.getContext('2d');
+  ctx.font = font;
+  return ctx.measureText(text).width;
+}
+function autoGrowInput(inputEl){
+  if(!inputEl) return;
+  const cs = getComputedStyle(inputEl);
+  const font = `${cs.fontStyle} ${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+  const text = inputEl.value || inputEl.getAttribute('placeholder') || '';
+  const textWidth = measureTextWidth(text, font);
+  const paddingH = (parseFloat(cs.paddingLeft)||0) + (parseFloat(cs.paddingRight)||0);
+  const borderH = (parseFloat(cs.borderLeftWidth)||0) + (parseFloat(cs.borderRightWidth)||0);
+  const minW = 56, maxW = 128;
+  let w = textWidth + paddingH + borderH + 8;
+  w = Math.max(minW, Math.min(maxW, w));
+  inputEl.style.width = w + 'px';
+}
+function initAffiliationWidths(){
+  blocksContainer.querySelectorAll('.p-affiliation').forEach(autoGrowInput);
+}
+
 function newBlock(){
   return { id:uid('block'), year:'2024', month:'01', day:'01', showMonth:true, showDay:true, font:'',
     titleColors:Object.assign({}, DEFAULT_TITLE_COLORS),
     profiles:[], relationships:[], events:[] };
 }
 function newProfile(){
-  return { id:uid('prof'), name:'', age:'', affiliation:'', status:'', image:'', imageSlot:true,
+  return { id:uid('prof'), name:'', age:'', affiliation:'', status:'', statusSlot:false, image:'', imageSlot:true,
     color:'#3c3440', bold:false, italic:false, underline:false };
 }
 function newRelationship(){
@@ -518,16 +557,22 @@ function profileHTML(p){
     <div class="no-image-slot only-edit">
       <button type="button" class="btn-tiny" data-action="add-image-slot">+ 이미지 칸 추가</button>
     </div>`;
+  const statusPart = p.statusSlot ? `
+      <div class="p-status-row">
+        <input class="content-input p-small p-status" data-field="status" placeholder="상태" value="${esc(p.status)}">
+        <button type="button" class="btn-icon danger only-edit p-status-remove" data-action="remove-status-slot" title="상태 칸 삭제">✕</button>
+      </div>` : `
+      <div class="only-edit"><button type="button" class="btn-tiny" data-action="add-status-slot">+ 상태 추가</button></div>`;
   return `
   <div class="profile-card" data-profile-id="${p.id}">
     ${imagePart}
     <div class="profile-fields" style="${styleStr}">
       <input class="content-input p-name" data-field="name" placeholder="이름" value="${esc(p.name)}">
       <div class="p-row">
-        <input class="content-input p-small" data-field="age" placeholder="나이" value="${esc(p.age)}">
-        <input class="content-input p-small" data-field="affiliation" placeholder="소속" value="${esc(p.affiliation)}">
-        <input class="content-input p-small" data-field="status" placeholder="상태" value="${esc(p.status)}">
+        <input class="content-input p-small p-age" data-field="age" placeholder="나이" value="${esc(p.age)}">
+        <input class="content-input p-small p-affiliation" data-field="affiliation" placeholder="소속" value="${esc(p.affiliation)}">
       </div>
+      ${statusPart}
     </div>
     <div class="style-row only-edit">
       <input type="color" class="color-picker" data-field="color" value="${p.color}" title="글자 색상">
@@ -640,6 +685,7 @@ function renderBlocks(){
     return;
   }
   blocksContainer.innerHTML = state.blocks.map((b,i)=>blockHTML(b,i,i===state.blocks.length-1)).join('');
+  initAffiliationWidths();
 }
 
 /* ================= 이벤트 위임 ================= */
@@ -705,6 +751,20 @@ blocksContainer.addEventListener('click',(ev)=>{
       const pid = btn.closest('.profile-card').dataset.profileId;
       const p = block.profiles.find(x=>x.id===pid);
       if(p) p.imageSlot = true;
+      renderBlocks();
+      break;
+    }
+    case 'add-status-slot': {
+      const pid = btn.closest('.profile-card').dataset.profileId;
+      const p = block.profiles.find(x=>x.id===pid);
+      if(p) p.statusSlot = true;
+      renderBlocks();
+      break;
+    }
+    case 'remove-status-slot': {
+      const pid = btn.closest('.profile-card').dataset.profileId;
+      const p = block.profiles.find(x=>x.id===pid);
+      if(p){ p.statusSlot = false; p.status = ''; }
       renderBlocks();
       break;
     }
@@ -783,6 +843,7 @@ blocksContainer.addEventListener('input',(ev)=>{
     const p = block.profiles.find(x=>x.id===pcard.dataset.profileId);
     p[field] = target.value;
     if(field==='color'){ pcard.querySelector('.profile-fields').style.color = target.value; }
+    if(field==='affiliation'){ autoGrowInput(target); }
   } else if(rrow){
     const r = block.relationships.find(x=>x.id===rrow.dataset.relId);
     r[field] = target.value;
@@ -841,6 +902,14 @@ function updateLineClass(){
 }
 document.getElementById('lineStyleSelect').onchange = (e)=>{ state.lineStyle = e.target.value; updateLineClass(); };
 
+function applyLineDotColors(){
+  const canvas = document.getElementById('canvas');
+  canvas.style.setProperty('--line-color', state.lineColor);
+  canvas.style.setProperty('--dot-color', state.dotColor);
+}
+document.getElementById('lineColorPicker').oninput = (e)=>{ state.lineColor = e.target.value; applyLineDotColors(); };
+document.getElementById('dotColorPicker').oninput = (e)=>{ state.dotColor = e.target.value; applyLineDotColors(); };
+
 function applyBackground(){
   const canvas = document.getElementById('canvas');
   canvas.style.background = state.bgType==='gradient'
@@ -898,7 +967,7 @@ document.getElementById('jsonImportInput').onchange = (e)=>{
       const imported = JSON.parse(ev.target.result);
       if(!imported || !Array.isArray(imported.blocks)) throw new Error('invalid');
       state = Object.assign({
-        globalFont:'Pretendard', lineStyle:'solid', bgType:'gradient',
+        globalFont:'Pretendard', lineStyle:'solid', lineColor:'#cbb3e6', dotColor:'#a683c9', bgType:'gradient',
         bgColor1:'#fdf5f8', bgColor2:'#eee3f6', commissionSource:'', mode:'edit', blocks:[]
       }, imported);
       applyAllSettingsToUI();
@@ -914,6 +983,8 @@ document.getElementById('jsonImportInput').onchange = (e)=>{
 function applyAllSettingsToUI(){
   document.getElementById('globalFontSelect').innerHTML = fontOptionsHTML(state.globalFont, false);
   document.getElementById('lineStyleSelect').value = state.lineStyle;
+  document.getElementById('lineColorPicker').value = state.lineColor;
+  document.getElementById('dotColorPicker').value = state.dotColor;
   document.getElementById('bgTypeSelect').value = state.bgType;
   document.getElementById('bgColor1').value = state.bgColor1;
   document.getElementById('bgColor2').value = state.bgColor2;
@@ -923,6 +994,7 @@ function applyAllSettingsToUI(){
   document.getElementById('canvas').style.fontFamily = fontStack(state.globalFont);
   applyBackground();
   updateLineClass();
+  applyLineDotColors();
   applyMode();
 }
 
