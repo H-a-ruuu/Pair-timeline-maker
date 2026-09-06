@@ -319,15 +319,19 @@ button{font-family:inherit; cursor:pointer; border:none;}
   text-align:center; display:flex; align-items:baseline; justify-content:center; flex-wrap:wrap;
 }
 .pair-name-input{
-  border:none; background:transparent; text-align:right; font:inherit; color:var(--accent-dark);
-  font-weight:800; font-size:inherit; letter-spacing:inherit; padding:2px 4px; border-radius:8px;
+  border:none; background:transparent; text-align:right; font:inherit; color:inherit;
+  font-weight:800; letter-spacing:inherit; padding:2px 4px; border-radius:8px;
   width:auto; min-width:40px;
 }
+#canvas .canvas-title .pair-name-input{ font-size:inherit; }
 #canvas.mode-preview .pair-name-input{ pointer-events:auto; }
 .pair-name-input:hover, .pair-name-input:focus{ background:var(--accent-soft); outline:none; }
-.pair-name-suffix{ font:inherit; color:var(--accent-dark); }
-.title-font-select{
+.pair-name-suffix{ font:inherit; color:inherit; }
+.title-color-picker-wrap{
   position:absolute; right:0; top:50%; transform:translateY(-50%);
+  display:flex; align-items:center; gap:6px;
+}
+.title-font-select{
   font-size:11px; padding:5px 7px; border-radius:8px; border:1px solid var(--border);
   color:var(--muted); background:#fff; font-family:'Pretendard',sans-serif; max-width:130px;
 }
@@ -423,7 +427,7 @@ button{font-family:inherit; cursor:pointer; border:none;}
   .block-font-select{margin-left:0;}
   .help-box{padding:26px 20px 22px;}
   .canvas-title{font-size:19px;}
-  .title-font-select{position:static; transform:none; margin-top:8px; display:block; margin-left:auto; margin-right:auto;}
+  .title-color-picker-wrap{position:static; transform:none; margin-top:8px; justify-content:center;}
   .canvas-title-row{flex-direction:column;}
 }
 </style>
@@ -499,7 +503,10 @@ button{font-family:inherit; cursor:pointer; border:none;}
       <div class="canvas-title">
         <input id="pairNameInput" class="pair-name-input" value="PAIR NAME" maxlength="40"><span class="pair-name-suffix"> TIMELINE</span>
       </div>
-      <select id="titleFontSelect" class="title-font-select only-edit" title="제목 전용 폰트"></select>
+      <div class="title-color-picker-wrap only-edit">
+        <input type="color" id="titleColorPicker" class="tiny-color" value="#7c56a8" title="제목 색상">
+        <select id="titleFontSelect" class="title-font-select" title="제목 전용 폰트"></select>
+      </div>
     </div>
     <div id="warningsContainer"></div>
     <div id="blocksContainer"></div>
@@ -576,6 +583,7 @@ let state = {
   globalFont:'Pretendard',
   pairName:'PAIR NAME',
   titleFont:'',
+  titleColor:'#7c56a8',
   lineStyle:'solid',
   lineColor:'#cbb3e6',
   dotColor:'#a683c9',
@@ -922,6 +930,10 @@ document.getElementById('titleFontSelect').onchange = (e)=>{
   state.titleFont = e.target.value;
   document.querySelector('.canvas-title').style.fontFamily = state.titleFont ? fontStack(state.titleFont) : '';
 };
+document.getElementById('titleColorPicker').oninput = (e)=>{
+  state.titleColor = e.target.value;
+  document.querySelector('.canvas-title').style.color = e.target.value;
+};
 
 /* ================= 이벤트 위임 ================= */
 blocksContainer.addEventListener('click',(ev)=>{
@@ -1206,7 +1218,7 @@ document.getElementById('jsonImportInput').onchange = (e)=>{
       const imported = JSON.parse(ev.target.result);
       if(!imported || !Array.isArray(imported.blocks)) throw new Error('invalid');
       state = Object.assign({
-        globalFont:'Pretendard', pairName:'PAIR NAME', titleFont:'', lineStyle:'solid', lineColor:'#cbb3e6', dotColor:'#a683c9', bgType:'gradient',
+        globalFont:'Pretendard', pairName:'PAIR NAME', titleFont:'', titleColor:'#7c56a8', lineStyle:'solid', lineColor:'#cbb3e6', dotColor:'#a683c9', bgType:'gradient',
         bgColor1:'#fdf5f8', bgColor2:'#eee3f6', commissionSource:'', mode:'edit', warnings:[], futureNote:null, blocks:[]
       }, imported);
       applyAllSettingsToUI();
@@ -1226,7 +1238,9 @@ function applyAllSettingsToUI(){
   document.getElementById('pairNameInput').value = state.pairName;
   autoGrowInput(document.getElementById('pairNameInput'), 60, 480, 14);
   document.getElementById('titleFontSelect').innerHTML = fontOptionsHTML(state.titleFont, true);
+  document.getElementById('titleColorPicker').value = state.titleColor;
   document.querySelector('.canvas-title').style.fontFamily = state.titleFont ? fontStack(state.titleFont) : '';
+  document.querySelector('.canvas-title').style.color = state.titleColor;
   document.getElementById('lineStyleSelect').value = state.lineStyle;
   document.getElementById('lineColorPicker').value = state.lineColor;
   document.getElementById('dotColorPicker').value = state.dotColor;
