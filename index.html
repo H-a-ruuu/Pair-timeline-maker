@@ -293,7 +293,7 @@ button{font-family:inherit; cursor:pointer; border:none;}
 .events-list{display:flex; flex-direction:column; gap:10px;}
 .event-row{background:#fff; border:1px solid var(--border); border-radius:12px; padding:11px;}
 .event-textarea{
-  width:100%; min-height:54px; resize:vertical; border:1px solid var(--border); border-radius:9px;
+  width:100%; min-height:44px; resize:none; overflow:hidden; border:1px solid var(--border); border-radius:9px;
   padding:9px; font-family:inherit; font-size:13.5px; line-height:1.55;
 }
 .event-row .style-row{justify-content:flex-start; padding-top:7px;}
@@ -393,7 +393,7 @@ button{font-family:inherit; cursor:pointer; border:none;}
   color:var(--muted); background:#fff; font-family:'Pretendard',sans-serif;
 }
 .future-note-textarea{
-  width:100%; min-height:64px; resize:vertical; border:1px solid var(--border); border-radius:9px;
+  width:100%; min-height:56px; resize:none; overflow:hidden; border:1px solid var(--border); border-radius:9px;
   padding:10px; font-family:inherit; font-size:13.5px; line-height:1.6; background:#fff;
 }
 
@@ -916,6 +916,10 @@ function renderBlocks(){
   blocksContainer.innerHTML = state.blocks.map((b,i)=>blockHTML(b,i,i===state.blocks.length-1)).join('');
   initAffiliationWidths();
   initRelKeywordSizes();
+  initEventTextareaHeights();
+}
+function initEventTextareaHeights(){
+  blocksContainer.querySelectorAll('.event-textarea').forEach(autoGrowTextareaHeight);
 }
 
 /* ================= 경고문구 배너 ================= */
@@ -1000,6 +1004,8 @@ function futureNoteHTML(){
 function renderFutureNote(){
   if(state.futureNote){
     futureNoteContainer.innerHTML = futureNoteHTML();
+    const ta = futureNoteContainer.querySelector('.future-note-textarea');
+    autoGrowTextareaHeight(ta);
   } else {
     futureNoteContainer.innerHTML = `<div class="future-note-add-wrap only-edit"><button type="button" class="btn-secondary" data-action="add-future-note">+ 앞으로의 이야기 추가</button></div>`;
   }
@@ -1027,6 +1033,7 @@ futureNoteContainer.addEventListener('input',(ev)=>{
   const target = ev.target;
   if(target.dataset.field==='futureText' && state.futureNote){
     state.futureNote.text = target.value;
+    autoGrowTextareaHeight(target);
   }
   if(target.dataset.action==='future-title-color' && state.futureNote){
     state.futureNote.titleColor = target.value;
@@ -1221,6 +1228,7 @@ blocksContainer.addEventListener('input',(ev)=>{
     const e = block.events.find(x=>x.id===erow.dataset.eventId);
     e[field] = target.value;
     if(field==='color'){ erow.querySelector('.event-textarea').style.color = target.value; }
+    if(field==='text'){ autoGrowTextareaHeight(target); }
   } else if(field==='year' || field==='month' || field==='day'){
     block[field] = target.value;
   } else if(field==='dateColor'){
@@ -1297,10 +1305,21 @@ document.getElementById('bgTypeSelect').onchange = (e)=>{
 document.getElementById('bgColor1').oninput = (e)=>{ state.bgColor1 = e.target.value; applyBackground(); };
 document.getElementById('bgColor2').oninput = (e)=>{ state.bgColor2 = e.target.value; applyBackground(); };
 
+function resizeAllAutoElements(){
+  blocksContainer.querySelectorAll('.p-affiliation').forEach(el=>autoGrowInput(el));
+  blocksContainer.querySelectorAll('.rel-keyword').forEach(el=>{ autoGrowInput(el, 80, 240, 12); autoGrowTextareaHeight(el); });
+  blocksContainer.querySelectorAll('.event-textarea').forEach(autoGrowTextareaHeight);
+  warningsContainer.querySelectorAll('.warning-genre-input').forEach(el=>autoGrowInput(el, 44, 220, 10));
+  const futureTa = futureNoteContainer.querySelector('.future-note-textarea');
+  if(futureTa) autoGrowTextareaHeight(futureTa);
+  const pairEl = document.getElementById('pairNameInput');
+  if(pairEl) autoGrowInput(pairEl, 60, 480, 14);
+}
 function applyMode(){
   const canvas = document.getElementById('canvas');
   canvas.classList.toggle('mode-preview', state.mode==='preview');
   document.getElementById('modeToggleBtn').textContent = state.mode==='edit' ? '프리뷰 모드' : '편집 모드로 돌아가기';
+  resizeAllAutoElements();
 }
 document.getElementById('modeToggleBtn').onclick = ()=>{
   state.mode = state.mode==='edit' ? 'preview' : 'edit';
@@ -1416,6 +1435,11 @@ renderBlocks();
 renderWarnings();
 renderFutureNote();
 applyAllSettingsToUI();
+
+/* 웹폰트가 뒤늦게 로드되어 글자 폭이 바뀌는 경우를 대비해 로드 완료 후 크기를 한 번 더 보정 */
+if(document.fonts && document.fonts.ready){
+  document.fonts.ready.then(()=>{ resizeAllAutoElements(); });
+}
 </script>
 </body>
 </html>
