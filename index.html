@@ -7,9 +7,23 @@
 <style>
 /* 웹폰트 — CDN 링크가 만료되었을 경우 시스템 sans-serif로 자연스럽게 폴백됩니다 */
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css');
-@import url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2107@1.1/Paperlogy.css');
-@import url('https://webfontworld.github.io/gmarket/GmarketSans.css');
 @import url('https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Do+Hyeon&family=East+Sea+Dokdo&family=Gaegu:wght@400;700&family=Gowun+Batang&family=Gowun+Dodum&family=Jua&family=Nanum+Pen+Script&family=Poor+Story&family=Song+Myung&family=Stylish&display=swap');
+
+/* Paperlogy — fonts-archive CDN (직접 @font-face로 지정해야 정상 로드됩니다) */
+@font-face{ font-family:'Paperlogy'; font-weight:400; font-style:normal; font-display:swap;
+  src:url('https://cdn.jsdelivr.net/gh/fonts-archive/Paperlogy/Paperlogy-4Regular.woff2') format('woff2'); }
+@font-face{ font-family:'Paperlogy'; font-weight:500; font-style:normal; font-display:swap;
+  src:url('https://cdn.jsdelivr.net/gh/fonts-archive/Paperlogy/Paperlogy-5Medium.woff2') format('woff2'); }
+@font-face{ font-family:'Paperlogy'; font-weight:700; font-style:normal; font-display:swap;
+  src:url('https://cdn.jsdelivr.net/gh/fonts-archive/Paperlogy/Paperlogy-7Bold.woff2') format('woff2'); }
+
+/* Gmarket Sans — fonts-archive CDN */
+@font-face{ font-family:'Gmarket Sans'; font-weight:300; font-style:normal; font-display:swap;
+  src:url('https://cdn.jsdelivr.net/gh/fonts-archive/GmarketSans/GmarketSansLight.woff2') format('woff2'); }
+@font-face{ font-family:'Gmarket Sans'; font-weight:500; font-style:normal; font-display:swap;
+  src:url('https://cdn.jsdelivr.net/gh/fonts-archive/GmarketSans/GmarketSansMedium.woff2') format('woff2'); }
+@font-face{ font-family:'Gmarket Sans'; font-weight:700; font-style:normal; font-display:swap;
+  src:url('https://cdn.jsdelivr.net/gh/fonts-archive/GmarketSans/GmarketSansBold.woff2') format('woff2'); }
 
 :root{
   --ink:#39303f;
@@ -155,7 +169,10 @@ button{font-family:inherit; cursor:pointer; border:none;}
 .rail-line.no-line{visibility:hidden; flex:1;}
 
 /* 연결선 스타일 */
-#canvas.line-dashed .rail-line{background:none; border-left:3px dashed var(--line-color); width:0;}
+#canvas.line-dashed .rail-line{
+  background:repeating-linear-gradient(to bottom, var(--line-color) 0, var(--line-color) 7px, transparent 7px, transparent 14px);
+  border-radius:0;
+}
 #canvas.line-gradient .rail-line{background:linear-gradient(to bottom, var(--accent), var(--blush));}
 #canvas.line-arrow .rail-line::after{
   content:''; position:absolute; left:50%; bottom:-2px; transform:translateX(-50%);
