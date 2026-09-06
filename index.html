@@ -284,18 +284,22 @@ button{font-family:inherit; cursor:pointer; border:none;}
 }
 .rel-input{flex:1; min-width:70px; font-size:13px; text-align:center;}
 .rel-keyword{
-  flex:0 0 auto; width:80px; min-width:80px; max-width:240px; font-size:13px; text-align:center; font-weight:700;
-  font-family:inherit; resize:none; overflow:hidden; line-height:1.4; padding:6px 8px;
-  transition:width .08s ease;
+  flex:0 0 auto; display:inline-block; min-width:80px; max-width:240px; width:auto;
+  font-size:13px; text-align:center; font-weight:700; font-family:inherit; line-height:1.4;
+  padding:6px 8px; white-space:pre-wrap; word-break:break-word; overflow-wrap:break-word;
+  border:1px solid var(--border); border-radius:9px; background:#fff; outline:none;
 }
+.rel-keyword:empty::before{ content:attr(data-placeholder); color:var(--muted); font-weight:400; }
 .rel-arrow{color:var(--sage-dark); font-weight:700;}
 
 .events-list{display:flex; flex-direction:column; gap:10px;}
 .event-row{background:#fff; border:1px solid var(--border); border-radius:12px; padding:11px;}
 .event-textarea{
-  width:100%; min-height:44px; resize:none; overflow:hidden; border:1px solid var(--border); border-radius:9px;
-  padding:9px; font-family:inherit; font-size:13.5px; line-height:1.55;
+  display:block; width:100%; min-height:20px; white-space:pre-wrap; word-break:break-word; overflow-wrap:break-word;
+  border:1px solid var(--border); border-radius:9px;
+  padding:9px; font-family:inherit; font-size:13.5px; line-height:1.55; outline:none; background:#fff;
 }
+.event-textarea:empty::before{ content:attr(data-placeholder); color:var(--muted); }
 .event-row .style-row{justify-content:flex-start; padding-top:7px;}
 
 .add-block-bottom{ display:flex; justify-content:center; margin-top:4px; margin-bottom:22px; }
@@ -393,9 +397,11 @@ button{font-family:inherit; cursor:pointer; border:none;}
   color:var(--muted); background:#fff; font-family:'Pretendard',sans-serif;
 }
 .future-note-textarea{
-  width:100%; min-height:56px; resize:none; overflow:hidden; border:1px solid var(--border); border-radius:9px;
-  padding:10px; font-family:inherit; font-size:13.5px; line-height:1.6; background:#fff;
+  display:block; width:100%; min-height:32px; white-space:pre-wrap; word-break:break-word; overflow-wrap:break-word;
+  border:1px solid var(--border); border-radius:9px;
+  padding:10px; font-family:inherit; font-size:13.5px; line-height:1.6; background:#fff; outline:none; color:inherit;
 }
+.future-note-textarea:empty::before{ content:attr(data-placeholder); color:var(--muted); }
 
 /* 공통 입력 요소 */
 #canvas input, #canvas textarea, #canvas select{
@@ -729,16 +735,25 @@ function autoGrowInput(inputEl, minW, maxW, buffer){
 function initAffiliationWidths(){
   blocksContainer.querySelectorAll('.p-affiliation').forEach(el=>autoGrowInput(el));
 }
-function autoGrowTextareaHeight(el){
-  if(!el) return;
-  el.style.height = 'auto';
-  el.style.height = el.scrollHeight + 'px';
+function normalizeEditableEmpty(el){
+  if(el && el.isContentEditable && el.textContent.trim()===''){ el.innerHTML=''; }
 }
-function initRelKeywordSizes(){
-  blocksContainer.querySelectorAll('.rel-keyword').forEach(el=>{
-    autoGrowInput(el, 80, 240, 12);
-    autoGrowTextareaHeight(el);
-  });
+function handleEditableKeydown(ev){
+  if(ev.key !== 'Enter') return;
+  const target = ev.target;
+  if(!target || !target.isContentEditable) return;
+  ev.preventDefault();
+  const sel = window.getSelection();
+  if(!sel || !sel.rangeCount) return;
+  const range = sel.getRangeAt(0);
+  range.deleteContents();
+  const nl = document.createTextNode('\n');
+  range.insertNode(nl);
+  range.setStartAfter(nl);
+  range.setEndAfter(nl);
+  sel.removeAllRanges();
+  sel.addRange(range);
+  target.dispatchEvent(new Event('input', {bubbles:true}));
 }
 
 function newBlock(){
@@ -816,7 +831,7 @@ function relationshipHTML(r){
   <div class="relationship-row" data-rel-id="${r.id}">
     <input class="content-input rel-input" data-field="charA" placeholder="캐릭터 A" value="${esc(r.charA)}">
     <span class="rel-arrow">↔</span>
-    <textarea class="content-input rel-keyword" data-field="keyword" placeholder="관계 키워드" rows="1" style="color:${r.color}">${esc(r.keyword)}</textarea>
+    <div class="rel-keyword" contenteditable="true" data-field="keyword" data-placeholder="관계 키워드" style="color:${r.color}">${esc(r.keyword)}</div>
     <span class="rel-arrow">↔</span>
     <input class="content-input rel-input" data-field="charB" placeholder="캐릭터 B" value="${esc(r.charB)}">
     <input type="color" class="color-picker only-edit" data-field="color" value="${r.color}" title="키워드 색상">
@@ -828,7 +843,7 @@ function eventHTML(e){
   const styleStr = `color:${e.color};${e.bold?'font-weight:700;':'font-weight:400;'}${e.italic?'font-style:italic;':'font-style:normal;'}${e.underline?'text-decoration:underline;':'text-decoration:none;'}`;
   return `
   <div class="event-row" data-event-id="${e.id}">
-    <textarea class="event-textarea" data-field="text" placeholder="이 시점에 있었던 사건을 적어주세요" style="${styleStr}">${esc(e.text)}</textarea>
+    <div class="event-textarea" contenteditable="true" data-field="text" data-placeholder="이 시점에 있었던 사건을 적어주세요" style="${styleStr}">${esc(e.text)}</div>
     <div class="style-row only-edit">
       <input type="color" class="color-picker" data-field="color" value="${e.color}" title="글자 색상">
       <button type="button" class="style-toggle ${e.bold?'active':''}" data-action="toggle-style" data-style="bold">B</button>
@@ -915,11 +930,6 @@ function renderBlocks(){
   }
   blocksContainer.innerHTML = state.blocks.map((b,i)=>blockHTML(b,i,i===state.blocks.length-1)).join('');
   initAffiliationWidths();
-  initRelKeywordSizes();
-  initEventTextareaHeights();
-}
-function initEventTextareaHeights(){
-  blocksContainer.querySelectorAll('.event-textarea').forEach(autoGrowTextareaHeight);
 }
 
 /* ================= 경고문구 배너 ================= */
@@ -998,18 +1008,17 @@ function futureNoteHTML(){
         <button type="button" class="btn-icon danger" data-action="remove-future-note" title="삭제">✕</button>
       </div>
     </div>
-    <textarea class="future-note-textarea" data-field="futureText" placeholder="이 이후 앞으로의 이야기가 어떻게 될지 적어보세요">${esc(state.futureNote.text)}</textarea>
+    <div class="future-note-textarea" contenteditable="true" data-field="futureText" data-placeholder="이 이후 앞으로의 이야기가 어떻게 될지 적어보세요">${esc(state.futureNote.text)}</div>
   </div>`;
 }
 function renderFutureNote(){
   if(state.futureNote){
     futureNoteContainer.innerHTML = futureNoteHTML();
-    const ta = futureNoteContainer.querySelector('.future-note-textarea');
-    autoGrowTextareaHeight(ta);
   } else {
     futureNoteContainer.innerHTML = `<div class="future-note-add-wrap only-edit"><button type="button" class="btn-secondary" data-action="add-future-note">+ 앞으로의 이야기 추가</button></div>`;
   }
 }
+futureNoteContainer.addEventListener('keydown', handleEditableKeydown);
 futureNoteContainer.addEventListener('click',(ev)=>{
   const btn = ev.target.closest('[data-action]');
   if(!btn) return;
@@ -1032,8 +1041,8 @@ futureNoteContainer.addEventListener('change',(ev)=>{
 futureNoteContainer.addEventListener('input',(ev)=>{
   const target = ev.target;
   if(target.dataset.field==='futureText' && state.futureNote){
-    state.futureNote.text = target.value;
-    autoGrowTextareaHeight(target);
+    state.futureNote.text = target.isContentEditable ? target.textContent : target.value;
+    normalizeEditableEmpty(target);
   }
   if(target.dataset.action==='future-title-color' && state.futureNote){
     state.futureNote.titleColor = target.value;
@@ -1064,6 +1073,7 @@ document.getElementById('titleColorPicker').oninput = (e)=>{
 document.getElementById('themeSelect').onchange = (e)=>{ applyTheme(e.target.value); };
 
 /* ================= 이벤트 위임 ================= */
+blocksContainer.addEventListener('keydown', handleEditableKeydown);
 blocksContainer.addEventListener('click',(ev)=>{
   const btn = ev.target.closest('[data-action]');
   if(!btn) return;
@@ -1221,14 +1231,14 @@ blocksContainer.addEventListener('input',(ev)=>{
     if(field==='affiliation'){ autoGrowInput(target); }
   } else if(rrow){
     const r = block.relationships.find(x=>x.id===rrow.dataset.relId);
-    r[field] = target.value;
+    r[field] = target.isContentEditable ? target.textContent : target.value;
     if(field==='color'){ rrow.querySelector('.rel-keyword').style.color = target.value; }
-    if(field==='keyword'){ autoGrowInput(target, 80, 240, 12); autoGrowTextareaHeight(target); }
+    if(field==='keyword'){ normalizeEditableEmpty(target); }
   } else if(erow){
     const e = block.events.find(x=>x.id===erow.dataset.eventId);
-    e[field] = target.value;
+    e[field] = target.isContentEditable ? target.textContent : target.value;
     if(field==='color'){ erow.querySelector('.event-textarea').style.color = target.value; }
-    if(field==='text'){ autoGrowTextareaHeight(target); }
+    if(field==='text'){ normalizeEditableEmpty(target); }
   } else if(field==='year' || field==='month' || field==='day'){
     block[field] = target.value;
   } else if(field==='dateColor'){
@@ -1307,11 +1317,7 @@ document.getElementById('bgColor2').oninput = (e)=>{ state.bgColor2 = e.target.v
 
 function resizeAllAutoElements(){
   blocksContainer.querySelectorAll('.p-affiliation').forEach(el=>autoGrowInput(el));
-  blocksContainer.querySelectorAll('.rel-keyword').forEach(el=>{ autoGrowInput(el, 80, 240, 12); autoGrowTextareaHeight(el); });
-  blocksContainer.querySelectorAll('.event-textarea').forEach(autoGrowTextareaHeight);
   warningsContainer.querySelectorAll('.warning-genre-input').forEach(el=>autoGrowInput(el, 44, 220, 10));
-  const futureTa = futureNoteContainer.querySelector('.future-note-textarea');
-  if(futureTa) autoGrowTextareaHeight(futureTa);
   const pairEl = document.getElementById('pairNameInput');
   if(pairEl) autoGrowInput(pairEl, 60, 480, 14);
 }
