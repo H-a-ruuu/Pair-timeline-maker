@@ -196,7 +196,7 @@ button{font-family:inherit; cursor:pointer; border:none;}
 .date-unit{font-size:12.5px; font-weight:700; color:var(--muted); margin-right:3px;}
 .date-input{
   border:1px solid var(--border); border-radius:9px; text-align:center;
-  padding:6px 4px; font-weight:800; color:var(--accent-dark); font-family:inherit; font-size:14.5px; background:#fff;
+  padding:6px 4px; font-weight:800; color:inherit; font-family:inherit; font-size:14.5px; background:#fff;
 }
 .year-input{width:58px;}
 .month-input,.day-input{width:38px;}
@@ -358,16 +358,29 @@ button{font-family:inherit; cursor:pointer; border:none;}
 #futureNoteContainer{ margin-top:6px; margin-bottom:6px; }
 .future-note-add-wrap{ display:flex; justify-content:center; margin-bottom:8px; }
 .future-note-card{
-  background:var(--paper); border:1.5px dashed var(--accent); border-radius:var(--radius);
-  padding:18px 20px 16px; box-shadow:var(--shadow-soft);
+  padding:18px 20px 16px; box-shadow:var(--shadow-soft); position:relative;
 }
-.future-note-header{display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;}
+.future-note-card.shape-dashed{ background:var(--paper); border:1.5px dashed var(--future-shape-color, var(--accent)); border-radius:var(--radius); }
+.future-note-card.shape-solid{ background:var(--paper); border:1.5px solid var(--future-shape-color, var(--accent)); border-radius:var(--radius); }
+.future-note-card.shape-soft{ background:var(--future-shape-color, var(--accent-soft)); border:none; border-radius:var(--radius); }
+.future-note-card.shape-bubble{ background:var(--paper); border:1.5px solid var(--future-shape-color, var(--accent)); border-radius:26px; margin-top:12px; }
+.future-note-card.shape-bubble::before{
+  content:''; position:absolute; top:-9px; left:34px; width:16px; height:16px;
+  background:var(--paper); border-left:1.5px solid var(--future-shape-color, var(--accent)); border-top:1.5px solid var(--future-shape-color, var(--accent));
+  transform:rotate(45deg); border-radius:4px 0 0 0;
+}
+.future-note-header{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:10px; flex-wrap:wrap;}
 .future-note-title{
   font-size:12.5px; font-weight:700; color:var(--accent-dark); letter-spacing:.01em; position:relative; padding-left:11px;
 }
 .future-note-title::before{
   content:''; position:absolute; left:0; top:50%; transform:translateY(-50%);
   width:4px; height:13px; border-radius:2px; background:currentColor;
+}
+.future-note-controls{display:flex; align-items:center; gap:6px;}
+.future-shape-select{
+  font-size:11px; padding:5px 7px; border-radius:8px; border:1px solid var(--border);
+  color:var(--muted); background:#fff; font-family:'Pretendard',sans-serif;
 }
 .future-note-textarea{
   width:100%; min-height:64px; resize:vertical; border:1px solid var(--border); border-radius:9px;
@@ -605,7 +618,7 @@ function initAffiliationWidths(){
 }
 
 function newBlock(){
-  return { id:uid('block'), year:'2024', month:'01', day:'01', showMonth:true, showDay:true, font:'',
+  return { id:uid('block'), year:'2024', month:'01', day:'01', showMonth:true, showDay:true, font:'', dateColor:'#7c56a8',
     titleColors:Object.assign({}, DEFAULT_TITLE_COLORS),
     profiles:[], relationships:[], events:[] };
 }
@@ -728,8 +741,9 @@ function sectionHTML(block, key){
 function dateRowHTML(block){
   const showMonth = block.showMonth !== false;
   const showDay = block.showDay !== false;
+  const dateColor = block.dateColor || '#7c56a8';
   let html = `<div class="date-row">
-    <div class="date-fields">
+    <div class="date-fields" style="color:${dateColor}">
       <input type="text" class="date-input year-input" data-field="year" value="${esc(block.year)}" maxlength="4"><span class="date-unit">년</span>`;
   if(showMonth){
     html += `<input type="text" class="date-input month-input" data-field="month" value="${esc(block.month)}" maxlength="2"><span class="date-unit">월</span><button type="button" class="date-remove-btn only-edit" data-action="remove-month" title="월 삭제">✕</button>`;
@@ -742,6 +756,7 @@ function dateRowHTML(block){
     html += `<button type="button" class="date-add-btn only-edit" data-action="add-day">+ 일</button>`;
   }
   html += `</div>
+    <input type="color" class="tiny-color date-color-picker only-edit" data-field="dateColor" value="${dateColor}" title="연도 색상">
     <select class="block-font-select only-edit" data-field="font" title="이 블록에만 적용할 폰트">${fontOptionsHTML(block.font, true)}</select>
     <button type="button" class="btn-icon danger only-edit" data-action="remove-block" title="블록 삭제">✕</button>
   </div>`;
@@ -832,11 +847,25 @@ document.getElementById('addCustomWarningBtn').onclick = ()=>{ state.warnings.pu
 /* ================= 앞으로의 이야기 (타임라인 선과 비연결) ================= */
 const futureNoteContainer = document.getElementById('futureNoteContainer');
 function futureNoteHTML(){
+  const shape = state.futureNote.shape || 'dashed';
+  const titleColor = state.futureNote.titleColor || '#7c56a8';
+  const shapeColor = state.futureNote.shapeColor || '#a683c9';
+  const shapeColorLabel = shape==='soft' ? '전체 색상' : shape==='bubble' ? '말풍선 선 색' : shape==='solid' ? '실선 색' : '점선 색';
   return `
-  <div class="future-note-card">
+  <div class="future-note-card shape-${shape}" style="--future-shape-color:${shapeColor}">
     <div class="future-note-header">
-      <span class="future-note-title">앞으로의 이야기</span>
-      <button type="button" class="btn-icon danger only-edit" data-action="remove-future-note" title="삭제">✕</button>
+      <span class="future-note-title" style="color:${titleColor}">앞으로의 이야기</span>
+      <div class="future-note-controls only-edit">
+        <select class="future-shape-select" data-action="future-shape" title="칸 모양">
+          <option value="dashed" ${shape==='dashed'?'selected':''}>점선</option>
+          <option value="solid" ${shape==='solid'?'selected':''}>실선</option>
+          <option value="soft" ${shape==='soft'?'selected':''}>파스텔</option>
+          <option value="bubble" ${shape==='bubble'?'selected':''}>말풍선</option>
+        </select>
+        <input type="color" class="tiny-color" data-action="future-shape-color" value="${shapeColor}" title="${shapeColorLabel}">
+        <input type="color" class="tiny-color" data-action="future-title-color" value="${titleColor}" title="제목 색상">
+        <button type="button" class="btn-icon danger" data-action="remove-future-note" title="삭제">✕</button>
+      </div>
     </div>
     <textarea class="future-note-textarea" data-field="futureText" placeholder="이 이후 앞으로의 이야기가 어떻게 될지 적어보세요">${esc(state.futureNote.text)}</textarea>
   </div>`;
@@ -852,10 +881,17 @@ futureNoteContainer.addEventListener('click',(ev)=>{
   const btn = ev.target.closest('[data-action]');
   if(!btn) return;
   if(btn.dataset.action==='add-future-note'){
-    state.futureNote = { text:'' };
+    state.futureNote = { text:'', shape:'dashed', titleColor:'#7c56a8', shapeColor:'#a683c9' };
     renderFutureNote();
   } else if(btn.dataset.action==='remove-future-note'){
     state.futureNote = null;
+    renderFutureNote();
+  }
+});
+futureNoteContainer.addEventListener('change',(ev)=>{
+  const target = ev.target;
+  if(target.dataset.action==='future-shape' && state.futureNote){
+    state.futureNote.shape = target.value;
     renderFutureNote();
   }
 });
@@ -863,6 +899,16 @@ futureNoteContainer.addEventListener('input',(ev)=>{
   const target = ev.target;
   if(target.dataset.field==='futureText' && state.futureNote){
     state.futureNote.text = target.value;
+  }
+  if(target.dataset.action==='future-title-color' && state.futureNote){
+    state.futureNote.titleColor = target.value;
+    const titleEl = futureNoteContainer.querySelector('.future-note-title');
+    if(titleEl) titleEl.style.color = target.value;
+  }
+  if(target.dataset.action==='future-shape-color' && state.futureNote){
+    state.futureNote.shapeColor = target.value;
+    const card = futureNoteContainer.querySelector('.future-note-card');
+    if(card) card.style.setProperty('--future-shape-color', target.value);
   }
 });
 
@@ -1043,6 +1089,10 @@ blocksContainer.addEventListener('input',(ev)=>{
     if(field==='color'){ erow.querySelector('.event-textarea').style.color = target.value; }
   } else if(field==='year' || field==='month' || field==='day'){
     block[field] = target.value;
+  } else if(field==='dateColor'){
+    block.dateColor = target.value;
+    const dateFieldsEl = target.closest('.date-row').querySelector('.date-fields');
+    if(dateFieldsEl) dateFieldsEl.style.color = target.value;
   }
 });
 
