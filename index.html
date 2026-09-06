@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>페어 타임라인 메이커</title>
+<style>
+/* 웹폰트 — CDN 링크가 만료되었을 경우 시스템 sans-serif로 자연스럽게 폴백됩니다 */
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css');
+@import url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2107@1.1/Paperlogy.css');
+@import url('https://webfontworld.github.io/gmarket/GmarketSans.css');
+@import url('https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Do+Hyeon&family=East+Sea+Dokdo&family=Gaegu:wght@400;700&family=Gowun+Batang&family=Gowun+Dodum&family=Jua&family=Nanum+Pen+Script&family=Poor+Story&family=Song+Myung&family=Stylish&display=swap');
+
+:root{
+  --ink:#39303f;
+  --muted:#9a8fa8;
+  --accent:#a683c9;
+  --accent-dark:#7c56a8;
+  --accent-soft:#f1e8fa;
+  --blush:#f6c6d6;
+  --blush-dark:#d97e9a;
+  --sage:#9dc2a0;
+  --sage-dark:#5c9366;
+  --paper:#fffdfb;
+  --border:#ecdff2;
+  --line-color:#cbb3e6;
+  --shadow:0 4px 18px rgba(124,86,168,0.12);
+  --shadow-soft:0 2px 9px rgba(124,86,168,0.08);
+  --radius:18px;
+  --font-global:'Pretendard','Noto Sans KR',sans-serif;
+}
+
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  font-family:'Pretendard','Noto Sans KR',sans-serif;
+  background:
+    radial-gradient(circle at 10% 6%, #f7ecfa 0%, transparent 42%),
+    radial-gradient(circle at 90% 94%, #eef4ec 0%, transparent 38%),
+    #efe9f4;
+  color:var(--ink);
+  min-height:100vh;
+  padding-bottom:60px;
+}
+
+/* ---------- 사용법 오버레이 ---------- */
+.help-overlay{
+  position:fixed; inset:0; background:#ffffff; z-index:999;
+  display:flex; align-items:center; justify-content:center; padding:24px;
+  overflow-y:auto;
+}
+.help-overlay.hidden{ display:none; }
+.help-box{
+  max-width:480px; width:100%; background:var(--paper); border:1px solid var(--border);
+  border-radius:22px; padding:32px 30px 26px; box-shadow:var(--shadow);
+}
+.help-title{font-size:18px; font-weight:800; color:var(--accent-dark); margin-bottom:18px; display:flex; align-items:center; gap:7px;}
+.help-list{margin:0 0 24px; padding-left:20px; display:flex; flex-direction:column; gap:10px; font-size:13.5px; line-height:1.6; color:var(--ink);}
+.help-list b{color:var(--accent-dark);}
+.help-confirm{width:100%; justify-content:center; text-align:center; font-size:14px; padding:11px 16px;}
+.help-credit{margin-top:18px; text-align:center; font-size:11.5px; color:var(--muted); font-weight:600; letter-spacing:.02em;}
+
+/* ---------- 툴바 ---------- */
+#toolbar{
+  position:sticky; top:0; z-index:50;
+  display:flex; flex-wrap:wrap; gap:14px 20px;
+  align-items:center; justify-content:space-between;
+  padding:16px 24px;
+  background:rgba(255,253,251,0.92);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--border);
+}
+.toolbar-left{display:flex; align-items:center; gap:12px;}
+.btn-icon-help{
+  width:34px; height:34px; border-radius:50%; background:#fff; border:1px solid var(--border);
+  font-size:16px; display:flex; align-items:center; justify-content:center; box-shadow:var(--shadow-soft);
+  flex-shrink:0;
+}
+.btn-icon-help:hover{background:var(--accent-soft);}
+.tt-main .btn-icon-help{width:23px; height:23px; font-size:12px; margin-left:4px; vertical-align:middle; box-shadow:none; border-color:var(--border);}
+.toolbar-title{display:flex; flex-direction:column; line-height:1.3;}
+.tt-main{font-size:19px; font-weight:800; letter-spacing:-0.01em; color:var(--accent-dark); display:flex; align-items:center; gap:6px;}
+.tt-main .tt-mark{color:var(--blush-dark); font-size:15px;}
+.tt-sub{font-size:12px; color:var(--muted);}
+.toolbar-controls{display:flex; flex-wrap:wrap; gap:10px; align-items:center;}
+.toolbar-field{
+  display:flex; align-items:center; gap:6px;
+  font-size:12.5px; color:var(--muted); font-weight:600;
+}
+.toolbar-field select{
+  font-size:13px; padding:6px 8px; border-radius:9px; border:1px solid var(--border);
+  background:#fff; color:var(--ink); font-family:inherit; max-width:150px;
+}
+.tiny-color{width:28px; height:28px; padding:0; border-radius:8px; border:1px solid var(--border); cursor:pointer; background:#fff;}
+
+button{font-family:inherit; cursor:pointer; border:none;}
+.btn-primary{
+  background:linear-gradient(135deg, var(--accent), var(--accent-dark));
+  color:#fff; font-weight:700; font-size:13px;
+  padding:9px 16px; border-radius:12px; box-shadow:var(--shadow-soft);
+  transition:transform .12s ease, box-shadow .12s ease;
+  display:inline-flex; align-items:center; gap:4px;
+}
+.btn-primary:hover{transform:translateY(-1px); box-shadow:var(--shadow);}
+.btn-secondary{
+  background:#fff; color:var(--accent-dark); font-weight:600; font-size:12.5px;
+  padding:8px 14px; border-radius:10px; border:1px solid var(--border);
+  transition:background .12s ease;
+}
+.btn-secondary:hover{background:var(--accent-soft);}
+.btn-accent{
+  background:linear-gradient(135deg, var(--blush), var(--accent));
+  color:#fff; font-weight:700; font-size:12.5px;
+  padding:9px 16px; border-radius:11px; box-shadow:var(--shadow-soft);
+}
+.btn-accent:hover{box-shadow:var(--shadow);}
+
+/* ---------- 캔버스 ---------- */
+#canvasWrapper{ padding:36px 18px 10px; display:flex; justify-content:center; }
+#canvas{
+  width:100%; max-width:900px;
+  background:linear-gradient(160deg, #fdf5f8, #eee3f6);
+  border-radius:24px;
+  padding:42px 34px 28px;
+  box-shadow:0 16px 46px rgba(124,86,168,0.16), inset 0 1px 0 rgba(255,255,255,0.6);
+  position:relative;
+  font-family:var(--font-global);
+}
+
+#blocksContainer{display:flex; flex-direction:column;}
+
+.empty-state{
+  text-align:center; padding:56px 20px; color:var(--muted);
+}
+.empty-state .es-title{font-size:16px; font-weight:700; color:var(--accent-dark); margin-bottom:6px;}
+.empty-state .es-sub{font-size:13px;}
+
+.timeline-block{
+  display:flex; gap:16px; align-items:stretch;
+}
+.rail{
+  display:flex; flex-direction:column; align-items:center;
+  width:22px; flex-shrink:0;
+}
+.node-dot{
+  width:16px; height:16px; border-radius:50%; flex-shrink:0; margin-top:6px;
+  background:radial-gradient(circle at 34% 30%, #ffffff, var(--accent) 55%, var(--accent-dark) 100%);
+  box-shadow:0 0 0 5px var(--accent-soft), 0 2px 7px rgba(124,86,168,.28);
+}
+.rail-line{
+  flex:1; width:3px; margin-top:8px; margin-bottom:2px; border-radius:3px;
+  background:var(--line-color);
+  position:relative;
+}
+.rail-line.no-line{visibility:hidden; flex:1;}
+
+/* 연결선 스타일 */
+#canvas.line-dashed .rail-line{background:none; border-left:3px dashed var(--line-color); width:0;}
+#canvas.line-gradient .rail-line{background:linear-gradient(to bottom, var(--accent), var(--blush));}
+#canvas.line-arrow .rail-line::after{
+  content:''; position:absolute; left:50%; bottom:-2px; transform:translateX(-50%);
+  border-left:7px solid transparent; border-right:7px solid transparent;
+  border-top:11px solid var(--line-color);
+}
+
+.block-right{ flex:1; min-width:0; display:flex; flex-direction:column; padding-bottom:28px; }
+
+/* 날짜 행 — 점(node-dot) 옆에 배치, 카드는 그 아래 */
+.date-row{
+  display:flex; align-items:center; flex-wrap:wrap; gap:9px;
+  padding:1px 2px 12px;
+}
+.date-fields{display:flex; align-items:center; gap:3px; font-size:15px; font-weight:800; color:var(--accent-dark);}
+.date-unit{font-size:12.5px; font-weight:700; color:var(--muted); margin-right:3px;}
+.date-input{
+  border:1px solid var(--border); border-radius:9px; text-align:center;
+  padding:6px 4px; font-weight:800; color:var(--accent-dark); font-family:inherit; font-size:14.5px; background:#fff;
+}
+.year-input{width:58px;}
+.month-input,.day-input{width:38px;}
+.date-add-btn{
+  font-size:11px; font-weight:700; border-radius:8px; padding:5px 9px;
+  background:var(--accent-soft); color:var(--accent-dark);
+}
+.date-add-btn:hover{background:#e6d6f5;}
+.date-remove-btn{
+  font-size:10.5px; font-weight:700; border-radius:7px; padding:2px 6px; margin-left:2px;
+  background:#fbe6ea; color:var(--blush-dark); border:none;
+}
+.date-remove-btn:hover{background:#f7d3db;}
+.block-font-select{
+  margin-left:auto; font-size:11.5px; padding:6px 8px; border-radius:9px; border:1px solid var(--border);
+  color:var(--muted); background:#fff; font-family:inherit; max-width:140px;
+}
+
+.block-card{
+  flex:1; min-width:0;
+  background:var(--paper); border:1px solid var(--border); border-radius:var(--radius);
+  box-shadow:var(--shadow-soft);
+  padding:20px 20px 18px;
+}
+.btn-icon{
+  width:27px; height:27px; border-radius:50%; background:#fff; border:1px solid var(--border);
+  color:#c26b7d; font-size:13px; line-height:1; display:flex; align-items:center; justify-content:center;
+  flex-shrink:0;
+}
+.btn-icon:hover{background:#fbe6ea;}
+
+.section{margin-bottom:20px;}
+.section:last-child{margin-bottom:0;}
+.section-title-row{display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; gap:8px;}
+.section-title{
+  font-size:12.5px; font-weight:700; letter-spacing:.01em; position:relative; padding-left:11px;
+}
+.section-title::before{
+  content:''; position:absolute; left:0; top:50%; transform:translateY(-50%);
+  width:4px; height:13px; border-radius:2px; background:currentColor;
+}
+.title-color-picker{width:22px; height:22px; padding:0; border-radius:7px; border:1px solid var(--border); background:#fff; cursor:pointer;}
+
+.profiles-list{display:flex; flex-wrap:wrap; gap:12px;}
+.profile-card{
+  width:202px; background:#fff; border:1px solid var(--border); border-radius:14px;
+  padding:13px; display:flex; flex-direction:column; gap:8px; position:relative;
+}
+.profile-image-wrap{display:flex; flex-direction:column; align-items:center; gap:6px;}
+.profile-image, .profile-image-placeholder{
+  width:78px; height:78px; border-radius:50%; object-fit:cover;
+  background:var(--accent-soft); border:2px solid #fff; box-shadow:0 0 0 1px var(--border);
+}
+.profile-image-placeholder{display:flex; align-items:center; justify-content:center; color:var(--accent); font-size:22px; font-weight:300;}
+.profile-image-actions{display:flex; gap:5px; flex-wrap:wrap; justify-content:center;}
+.btn-tiny{
+  font-size:10.5px; padding:4px 8px; border-radius:7px; background:var(--accent-soft); color:var(--accent-dark);
+  font-weight:600; position:relative; overflow:hidden; display:inline-block;
+}
+.btn-tiny.danger{background:#fbe6ea; color:#c26b7d;}
+.hidden-file-input{ position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; }
+.no-image-slot{ padding:6px 0 2px; text-align:center; }
+.profile-fields{display:flex; flex-direction:column; gap:6px;}
+.p-name{font-weight:700; text-align:center;}
+.p-row{display:flex; flex-wrap:wrap; gap:4px;}
+.p-small{flex:1; min-width:0; font-size:11.5px;}
+.style-row{display:flex; align-items:center; gap:5px; justify-content:center; padding-top:2px;}
+.style-toggle{
+  width:22px; height:22px; border-radius:6px; background:#fff; border:1px solid var(--border);
+  font-size:11px; font-weight:700; color:var(--muted);
+}
+.style-toggle.active{background:var(--accent); color:#fff; border-color:var(--accent);}
+.color-picker{width:24px; height:24px; padding:0; border-radius:7px; border:1px solid var(--border); background:#fff;}
+
+.relationships-list{display:flex; flex-direction:column; gap:8px;}
+.relationship-row{
+  display:flex; align-items:center; gap:6px; flex-wrap:wrap;
+  background:#fff; border:1px solid var(--border); border-radius:12px; padding:9px 11px;
+}
+.rel-input{flex:1; min-width:70px; font-size:13px; text-align:center;}
+.rel-keyword{flex:1.3; min-width:80px; font-size:13px; text-align:center; font-weight:700;}
+.rel-arrow{color:var(--sage-dark); font-weight:700;}
+
+.events-list{display:flex; flex-direction:column; gap:10px;}
+.event-row{background:#fff; border:1px solid var(--border); border-radius:12px; padding:11px;}
+.event-textarea{
+  width:100%; min-height:54px; resize:vertical; border:1px solid var(--border); border-radius:9px;
+  padding:9px; font-family:inherit; font-size:13.5px; line-height:1.55;
+}
+.event-row .style-row{justify-content:flex-start; padding-top:7px;}
+
+.add-block-bottom{ display:flex; justify-content:center; margin-top:4px; margin-bottom:22px; }
+
+.canvas-footer{
+  display:flex; align-items:flex-end; justify-content:space-between; gap:14px; flex-wrap:wrap;
+  padding-top:20px; margin-top:10px; border-top:1px dashed var(--border);
+}
+.commission-wrap{display:flex; align-items:center; gap:3px;}
+.commission-prefix{font-size:11.5px; color:var(--muted); font-weight:700;}
+.commission-input{
+  font-size:11.5px; color:var(--muted); border:1px dashed var(--border); border-radius:8px;
+  padding:6px 10px; min-width:150px; background:transparent; font-family:inherit;
+}
+.watermark{
+  font-size:11.5px; color:var(--muted); font-weight:600; letter-spacing:.02em; white-space:nowrap;
+}
+
+/* 공통 입력 요소 */
+#canvas input, #canvas textarea, #canvas select{
+  font-size:13px; color:inherit; font-family:inherit;
+}
+#canvas .content-input{
+  border:1px solid var(--border); border-radius:9px; padding:6px 8px; background:#fff;
+}
+
+/* ---------- 프리뷰 모드 ---------- */
+#canvas.mode-preview .only-edit{ display:none !important; }
+#canvas.mode-preview .content-input,
+#canvas.mode-preview .date-input,
+#canvas.mode-preview .rel-input,
+#canvas.mode-preview .rel-keyword,
+#canvas.mode-preview .event-textarea,
+#canvas.mode-preview .commission-input{
+  border-color:transparent !important; background:transparent !important; pointer-events:none; resize:none;
+}
+#canvas.mode-preview .relationship-row,
+#canvas.mode-preview .event-row{ background:transparent; border-style:dashed; }
+#canvas.mode-preview .profile-card{ background:transparent; }
+#canvas.mode-preview .commission-wrap.is-empty{ display:none; }
+
+@media (max-width:560px){
+  #toolbar{padding:12px 14px;}
+  #canvasWrapper{padding:22px 8px;}
+  #canvas{padding:26px 16px 20px; border-radius:18px;}
+  .profile-card{width:100%;}
+  .rail{width:16px;}
+  .block-font-select{margin-left:0;}
+  .help-box{padding:26px 20px 22px;}
+}
+</style>
+</head>
+<body>
+
+<div id="helpOverlay" class="help-overlay">
+  <div class="help-box">
+    <div class="help-title">✦ 페어 타임라인 메이커 사용 방법</div>
+    <ul class="help-list">
+      <li><b>블록 추가</b> — 상단 또는 하단의 '+ 새 타임라인 블록 추가' 버튼으로 장면을 이어서 기록해요.</li>
+      <li><b>날짜</b> — 연도만 남기고 싶다면 월·일 옆의 ✕ 버튼으로 지울 수 있어요.</li>
+      <li><b>캐릭터 프로필</b> — 사진 업로드/삭제, 이름·나이·소속·상태를 자유롭게 적고, 이미지 칸 자체도 없앨 수 있어요.</li>
+      <li><b>관계도 · 주요 사건</b> — 항목을 추가하면 제목이 나타나고, 제목 옆 색상 피커로 제목 글자색을 바꿀 수 있어요.</li>
+      <li><b>스타일</b> — 각 글자마다 색상·굵게·기울임·밑줄을 지정하고, 블록별·전체 폰트와 연결선 스타일도 바꿀 수 있어요.</li>
+      <li><b>저장</b> — JSON으로 중간 저장 후 다시 불러올 수 있고, 프리뷰 모드에서 확인 후 고화질 PNG로 저장하세요.</li>
+    </ul>
+    <button id="helpConfirmBtn" class="btn-primary help-confirm">확인</button>
+    <div class="help-credit">제작 @S30N6NG</div>
+  </div>
+</div>
+
+<div id="toolbar">
+  <div class="toolbar-left">
+    <div class="toolbar-title">
+      <span class="tt-main"><span class="tt-mark">✦</span>페어 타임라인 메이커<button id="helpBtn" class="btn-icon-help" title="사용 방법 보기">💡</button></span>
+      <span class="tt-sub">두 캐릭터의 서사와 관계 변화를 기록하는 타임라인</span>
+    </div>
+  </div>
+  <div class="toolbar-controls">
+    <button id="addBlockBtnTop" class="btn-primary">+ 새 타임라인 블록 추가</button>
+
+    <label class="toolbar-field">폰트
+      <select id="globalFontSelect"></select>
+    </label>
+
+    <label class="toolbar-field">연결선
+      <select id="lineStyleSelect">
+        <option value="solid">실선</option>
+        <option value="dashed">점선</option>
+        <option value="gradient">그라데이션</option>
+        <option value="arrow">화살표</option>
+      </select>
+    </label>
+
+    <label class="toolbar-field">배경
+      <select id="bgTypeSelect">
+        <option value="gradient">그라데이션</option>
+        <option value="solid">단색</option>
+      </select>
+    </label>
+    <input type="color" id="bgColor1" class="tiny-color" value="#fdf5f8" title="배경색 1">
+    <input type="color" id="bgColor2" class="tiny-color" value="#eee3f6" title="배경색 2 (그라데이션)">
+
+    <button id="modeToggleBtn" class="btn-secondary">프리뷰 모드</button>
+    <button id="exportJsonBtn" class="btn-secondary">중간 저장 (JSON)</button>
+    <button id="importJsonBtn" class="btn-secondary">불러오기</button>
+    <button id="exportPngBtn" class="btn-accent">PNG로 저장하기</button>
+  </div>
+</div>
+
+<div id="canvasWrapper">
+  <div id="canvas" class="line-solid">
+    <div id="blocksContainer"></div>
+    <div class="add-block-bottom only-edit">
+      <button id="addBlockBtnBottom" class="btn-primary">+ 새 타임라인 블록 추가</button>
+    </div>
+    <div class="canvas-footer">
+      <div id="commissionWrap" class="commission-wrap is-empty">
+        <span id="commissionPrefix" class="commission-prefix" style="display:none;">ⓒ</span>
+        <input id="commissionInput" class="commission-input" placeholder="커미션 출처">
+      </div>
+      <div class="watermark">@S30N6UN / @30M1__</div>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="jsonImportInput" accept="application/json" style="display:none">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>
+/* ================= 폰트 목록 ================= */
+const FONT_GROUPS = [
+  {label:'고딕', fonts:[
+    {value:'Pretendard', label:'Pretendard (기본)'},
+    {value:'GmarketSans', label:'Gmarket Sans'},
+    {value:'BlackHanSans', label:'Black Han Sans'},
+    {value:'DoHyeon', label:'Do Hyeon'},
+    {value:'Jua', label:'Jua'},
+    {value:'GowunDodum', label:'Gowun Dodum'},
+    {value:'Stylish', label:'Stylish'}
+  ]},
+  {label:'디스플레이', fonts:[
+    {value:'Paperlogy', label:'Paperlogy'}
+  ]},
+  {label:'손글씨', fonts:[
+    {value:'Gaegu', label:'Gaegu'},
+    {value:'NanumPenScript', label:'Nanum Pen Script'},
+    {value:'PoorStory', label:'Poor Story'},
+    {value:'EastSeaDokdo', label:'East Sea Dokdo'}
+  ]},
+  {label:'명조', fonts:[
+    {value:'GowunBatang', label:'Gowun Batang'},
+    {value:'SongMyung', label:'Song Myung'}
+  ]}
+];
+const FONT_STACKS = {
+  Pretendard:"'Pretendard','Noto Sans KR',sans-serif",
+  GmarketSans:"'Gmarket Sans','GmarketSansMedium','Pretendard',sans-serif",
+  Paperlogy:"'Paperlogy','Pretendard',sans-serif",
+  BlackHanSans:"'Black Han Sans','Pretendard',sans-serif",
+  DoHyeon:"'Do Hyeon','Pretendard',sans-serif",
+  Jua:"'Jua','Pretendard',sans-serif",
+  GowunDodum:"'Gowun Dodum','Pretendard',sans-serif",
+  Stylish:"'Stylish','Pretendard',sans-serif",
+  Gaegu:"'Gaegu','Pretendard',sans-serif",
+  NanumPenScript:"'Nanum Pen Script','Pretendard',cursive",
+  PoorStory:"'Poor Story','Pretendard',sans-serif",
+  EastSeaDokdo:"'East Sea Dokdo','Pretendard',cursive",
+  GowunBatang:"'Gowun Batang','Pretendard',serif",
+  SongMyung:"'Song Myung','Pretendard',serif"
+};
+function fontStack(name){ return FONT_STACKS[name] || FONT_STACKS.Pretendard; }
+function fontOptionsHTML(selected, includeFollowGlobal){
+  let html = includeFollowGlobal ? `<option value="">전체 폰트 따르기</option>` : '';
+  FONT_GROUPS.forEach(g=>{
+    html += `<optgroup label="${g.label}">`;
+    g.fonts.forEach(f=>{
+      html += `<option value="${f.value}" ${selected===f.value?'selected':''}>${f.label}</option>`;
+    });
+    html += `</optgroup>`;
+  });
+  return html;
+}
+
+const DEFAULT_TITLE_COLORS = { profiles:'#7c56a8', relationships:'#5c9366', events:'#d97e9a' };
+
+/* ================= 상태 ================= */
+let state = {
+  globalFont:'Pretendard',
+  lineStyle:'solid',
+  bgType:'gradient',
+  bgColor1:'#fdf5f8',
+  bgColor2:'#eee3f6',
+  commissionSource:'',
+  mode:'edit',
+  blocks:[]
+};
+
+function uid(p){ return p+'_'+Math.random().toString(36).slice(2,9); }
+function esc(s){ return (s==null?'':String(s)).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function newBlock(){
+  return { id:uid('block'), year:'2024', month:'01', day:'01', showMonth:true, showDay:true, font:'',
+    titleColors:Object.assign({}, DEFAULT_TITLE_COLORS),
+    profiles:[], relationships:[], events:[] };
+}
+function newProfile(){
+  return { id:uid('prof'), name:'', age:'', affiliation:'', status:'', image:'', imageSlot:true,
+    color:'#3c3440', bold:false, italic:false, underline:false };
+}
+function newRelationship(){
+  return { id:uid('rel'), charA:'', keyword:'', charB:'', color:'#9b7fc9' };
+}
+function newEvent(){
+  return { id:uid('evt'), text:'', color:'#3c3440', bold:false, italic:false, underline:false };
+}
+
+/* 시작 예시 블록 */
+(function seed(){
+  const b = newBlock();
+  b.profiles.push(newProfile(), newProfile());
+  b.relationships.push(newRelationship());
+  b.events.push(newEvent());
+  state.blocks.push(b);
+})();
+
+/* ================= 렌더링 ================= */
+const blocksContainer = document.getElementById('blocksContainer');
+
+function profileHTML(p){
+  const styleStr = `color:${p.color};${p.bold?'font-weight:700;':'font-weight:400;'}${p.italic?'font-style:italic;':'font-style:normal;'}${p.underline?'text-decoration:underline;':'text-decoration:none;'}`;
+  const imageSlotOn = p.imageSlot !== false;
+  const imagePart = imageSlotOn ? `
+    <div class="profile-image-wrap">
+      ${p.image ? `<img src="${p.image}" class="profile-image" alt="${esc(p.name)}">` : `<div class="profile-image-placeholder">＋</div>`}
+      <div class="profile-image-actions only-edit">
+        <label class="btn-tiny">사진<input type="file" accept="image/*" class="hidden-file-input" data-action="upload-image"></label>
+        ${p.image ? `<button type="button" class="btn-tiny danger" data-action="remove-image">삭제</button>` : ''}
+        <button type="button" class="btn-tiny danger" data-action="remove-image-slot" title="이미지 칸 자체를 없앱니다">칸 삭제</button>
+      </div>
+    </div>` : `
+    <div class="no-image-slot only-edit">
+      <button type="button" class="btn-tiny" data-action="add-image-slot">+ 이미지 칸 추가</button>
+    </div>`;
+  return `
+  <div class="profile-card" data-profile-id="${p.id}">
+    ${imagePart}
+    <div class="profile-fields" style="${styleStr}">
+      <input class="content-input p-name" data-field="name" placeholder="이름" value="${esc(p.name)}">
+      <div class="p-row">
+        <input class="content-input p-small" data-field="age" placeholder="나이" value="${esc(p.age)}">
+        <input class="content-input p-small" data-field="affiliation" placeholder="소속" value="${esc(p.affiliation)}">
+        <input class="content-input p-small" data-field="status" placeholder="상태" value="${esc(p.status)}">
+      </div>
+    </div>
+    <div class="style-row only-edit">
+      <input type="color" class="color-picker" data-field="color" value="${p.color}" title="글자 색상">
+      <button type="button" class="style-toggle ${p.bold?'active':''}" data-action="toggle-style" data-style="bold">B</button>
+      <button type="button" class="style-toggle ${p.italic?'active':''}" data-action="toggle-style" data-style="italic">I</button>
+      <button type="button" class="style-toggle ${p.underline?'active':''}" data-action="toggle-style" data-style="underline">U</button>
+      <button type="button" class="btn-icon danger" data-action="remove-profile">✕</button>
+    </div>
+  </div>`;
+}
+
+function relationshipHTML(r){
+  return `
+  <div class="relationship-row" data-rel-id="${r.id}">
+    <input class="content-input rel-input" data-field="charA" placeholder="캐릭터 A" value="${esc(r.charA)}">
+    <span class="rel-arrow">↔</span>
+    <input class="content-input rel-keyword" data-field="keyword" placeholder="관계 키워드" value="${esc(r.keyword)}" style="color:${r.color}">
+    <span class="rel-arrow">↔</span>
+    <input class="content-input rel-input" data-field="charB" placeholder="캐릭터 B" value="${esc(r.charB)}">
+    <input type="color" class="color-picker only-edit" data-field="color" value="${r.color}" title="키워드 색상">
+    <button type="button" class="btn-icon danger only-edit" data-action="remove-relationship">✕</button>
+  </div>`;
+}
+
+function eventHTML(e){
+  const styleStr = `color:${e.color};${e.bold?'font-weight:700;':'font-weight:400;'}${e.italic?'font-style:italic;':'font-style:normal;'}${e.underline?'text-decoration:underline;':'text-decoration:none;'}`;
+  return `
+  <div class="event-row" data-event-id="${e.id}">
+    <textarea class="event-textarea" data-field="text" placeholder="이 시점에 있었던 사건을 적어주세요" style="${styleStr}">${esc(e.text)}</textarea>
+    <div class="style-row only-edit">
+      <input type="color" class="color-picker" data-field="color" value="${e.color}" title="글자 색상">
+      <button type="button" class="style-toggle ${e.bold?'active':''}" data-action="toggle-style" data-style="bold">B</button>
+      <button type="button" class="style-toggle ${e.italic?'active':''}" data-action="toggle-style" data-style="italic">I</button>
+      <button type="button" class="style-toggle ${e.underline?'active':''}" data-action="toggle-style" data-style="underline">U</button>
+      <button type="button" class="btn-icon danger" data-action="remove-event">✕</button>
+    </div>
+  </div>`;
+}
+
+const SECTION_META = {
+  profiles:      { title:'캐릭터 프로필', addLabel:'+ 프로필 추가',  addAction:'add-profile',      listClass:'profiles-list',      itemsFn:b=>b.profiles,      renderFn:profileHTML },
+  relationships: { title:'관계도',       addLabel:'+ 관계 추가',    addAction:'add-relationship', listClass:'relationships-list', itemsFn:b=>b.relationships, renderFn:relationshipHTML },
+  events:        { title:'주요 사건',     addLabel:'+ 사건 추가',    addAction:'add-event',        listClass:'events-list',        itemsFn:b=>b.events,        renderFn:eventHTML }
+};
+
+function sectionHTML(block, key){
+  const meta = SECTION_META[key];
+  const items = meta.itemsFn(block);
+  const hasItems = items.length > 0;
+  const titleColor = (block.titleColors && block.titleColors[key]) || DEFAULT_TITLE_COLORS[key];
+  return `
+  <div class="section ${key}-section" data-section="${key}">
+    ${hasItems ? `
+    <div class="section-title-row">
+      <span class="section-title" style="color:${titleColor}">${meta.title}</span>
+      <input type="color" class="title-color-picker only-edit" data-action="title-color" data-section="${key}" value="${titleColor}" title="제목 글자 색상 바꾸기">
+    </div>` : ''}
+    <div class="${meta.listClass}">${items.map(meta.renderFn).join('')}</div>
+    <div class="only-edit" style="margin-top:8px;"><button type="button" class="btn-secondary" data-action="${meta.addAction}">${meta.addLabel}</button></div>
+  </div>`;
+}
+
+function dateRowHTML(block){
+  const showMonth = block.showMonth !== false;
+  const showDay = block.showDay !== false;
+  let html = `<div class="date-row">
+    <div class="date-fields">
+      <input type="text" class="date-input year-input" data-field="year" value="${esc(block.year)}" maxlength="4"><span class="date-unit">년</span>`;
+  if(showMonth){
+    html += `<input type="text" class="date-input month-input" data-field="month" value="${esc(block.month)}" maxlength="2"><span class="date-unit">월</span><button type="button" class="date-remove-btn only-edit" data-action="remove-month" title="월 삭제">✕</button>`;
+  } else {
+    html += `<button type="button" class="date-add-btn only-edit" data-action="add-month">+ 월</button>`;
+  }
+  if(showMonth && showDay){
+    html += `<input type="text" class="date-input day-input" data-field="day" value="${esc(block.day)}" maxlength="2"><span class="date-unit">일</span><button type="button" class="date-remove-btn only-edit" data-action="remove-day" title="일 삭제">✕</button>`;
+  } else if(showMonth && !showDay){
+    html += `<button type="button" class="date-add-btn only-edit" data-action="add-day">+ 일</button>`;
+  }
+  html += `</div>
+    <select class="block-font-select only-edit" data-field="font" title="이 블록에만 적용할 폰트">${fontOptionsHTML(block.font, true)}</select>
+    <button type="button" class="btn-icon danger only-edit" data-action="remove-block" title="블록 삭제">✕</button>
+  </div>`;
+  return html;
+}
+
+function blockHTML(block, idx, isLast){
+  return `
+  <div class="timeline-block" data-block-id="${block.id}" style="${block.font ? 'font-family:'+fontStack(block.font)+';' : ''}">
+    <div class="rail">
+      <div class="node-dot"></div>
+      <div class="rail-line ${isLast?'no-line':''}"></div>
+    </div>
+    <div class="block-right">
+      ${dateRowHTML(block)}
+      <div class="block-card">
+        ${sectionHTML(block,'profiles')}
+        ${sectionHTML(block,'relationships')}
+        ${sectionHTML(block,'events')}
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderBlocks(){
+  if(state.blocks.length===0){
+    blocksContainer.innerHTML = `<div class="empty-state">
+      <div class="es-title">아직 작성된 타임라인이 없어요</div>
+      <div class="es-sub">위쪽 '+ 새 타임라인 블록 추가' 버튼을 눌러 첫 장면을 기록해보세요.</div>
+    </div>`;
+    return;
+  }
+  blocksContainer.innerHTML = state.blocks.map((b,i)=>blockHTML(b,i,i===state.blocks.length-1)).join('');
+}
+
+/* ================= 이벤트 위임 ================= */
+blocksContainer.addEventListener('click',(ev)=>{
+  const btn = ev.target.closest('[data-action]');
+  if(!btn) return;
+  const action = btn.dataset.action;
+  if(action==='upload-image') return; /* change 이벤트에서 처리 */
+
+  const blockEl = btn.closest('.timeline-block');
+  if(!blockEl) return;
+  const block = state.blocks.find(b=>b.id===blockEl.dataset.blockId);
+  if(!block) return;
+
+  switch(action){
+    case 'remove-block':
+      if(confirm('이 타임라인 블록을 삭제할까요?')){
+        state.blocks = state.blocks.filter(b=>b.id!==block.id);
+        renderBlocks();
+      }
+      break;
+    case 'remove-month':
+      block.showMonth = false; block.showDay = false;
+      renderBlocks();
+      break;
+    case 'add-month':
+      block.showMonth = true;
+      renderBlocks();
+      break;
+    case 'remove-day':
+      block.showDay = false;
+      renderBlocks();
+      break;
+    case 'add-day':
+      block.showDay = true;
+      renderBlocks();
+      break;
+    case 'add-profile':
+      block.profiles.push(newProfile());
+      renderBlocks();
+      break;
+    case 'remove-profile': {
+      const pid = btn.closest('.profile-card').dataset.profileId;
+      block.profiles = block.profiles.filter(p=>p.id!==pid);
+      renderBlocks();
+      break;
+    }
+    case 'remove-image': {
+      const pid = btn.closest('.profile-card').dataset.profileId;
+      const p = block.profiles.find(x=>x.id===pid);
+      if(p) p.image='';
+      renderBlocks();
+      break;
+    }
+    case 'remove-image-slot': {
+      const pid = btn.closest('.profile-card').dataset.profileId;
+      const p = block.profiles.find(x=>x.id===pid);
+      if(p){ p.imageSlot=false; p.image=''; }
+      renderBlocks();
+      break;
+    }
+    case 'add-image-slot': {
+      const pid = btn.closest('.profile-card').dataset.profileId;
+      const p = block.profiles.find(x=>x.id===pid);
+      if(p) p.imageSlot = true;
+      renderBlocks();
+      break;
+    }
+    case 'add-relationship':
+      block.relationships.push(newRelationship());
+      renderBlocks();
+      break;
+    case 'remove-relationship': {
+      const rid = btn.closest('.relationship-row').dataset.relId;
+      block.relationships = block.relationships.filter(r=>r.id!==rid);
+      renderBlocks();
+      break;
+    }
+    case 'add-event':
+      block.events.push(newEvent());
+      renderBlocks();
+      break;
+    case 'remove-event': {
+      const eid = btn.closest('.event-row').dataset.eventId;
+      block.events = block.events.filter(x=>x.id!==eid);
+      renderBlocks();
+      break;
+    }
+    case 'toggle-style': {
+      const styleKey = btn.dataset.style;
+      const pcard = btn.closest('.profile-card');
+      const erow = btn.closest('.event-row');
+      if(pcard){
+        const p = block.profiles.find(x=>x.id===pcard.dataset.profileId);
+        p[styleKey] = !p[styleKey];
+        btn.classList.toggle('active', p[styleKey]);
+        const el = pcard.querySelector('.profile-fields');
+        el.style.fontWeight = p.bold?'700':'400';
+        el.style.fontStyle = p.italic?'italic':'normal';
+        el.style.textDecoration = p.underline?'underline':'none';
+      } else if(erow){
+        const e = block.events.find(x=>x.id===erow.dataset.eventId);
+        e[styleKey] = !e[styleKey];
+        btn.classList.toggle('active', e[styleKey]);
+        const el = erow.querySelector('.event-textarea');
+        el.style.fontWeight = e.bold?'700':'400';
+        el.style.fontStyle = e.italic?'italic':'normal';
+        el.style.textDecoration = e.underline?'underline':'none';
+      }
+      break;
+    }
+  }
+});
+
+blocksContainer.addEventListener('input',(ev)=>{
+  const target = ev.target;
+
+  if(target.dataset.action === 'title-color'){
+    const key = target.dataset.section;
+    const blockEl = target.closest('.timeline-block');
+    const block = state.blocks.find(b=>b.id===blockEl.dataset.blockId);
+    if(!block) return;
+    if(!block.titleColors) block.titleColors = Object.assign({}, DEFAULT_TITLE_COLORS);
+    block.titleColors[key] = target.value;
+    const titleEl = target.closest('.section-title-row').querySelector('.section-title');
+    if(titleEl) titleEl.style.color = target.value;
+    return;
+  }
+
+  const field = target.dataset.field;
+  if(!field) return;
+  const blockEl = target.closest('.timeline-block');
+  const block = state.blocks.find(b=>b.id===blockEl.dataset.blockId);
+  if(!block) return;
+
+  const pcard = target.closest('.profile-card');
+  const rrow = target.closest('.relationship-row');
+  const erow = target.closest('.event-row');
+
+  if(pcard){
+    const p = block.profiles.find(x=>x.id===pcard.dataset.profileId);
+    p[field] = target.value;
+    if(field==='color'){ pcard.querySelector('.profile-fields').style.color = target.value; }
+  } else if(rrow){
+    const r = block.relationships.find(x=>x.id===rrow.dataset.relId);
+    r[field] = target.value;
+    if(field==='color'){ rrow.querySelector('.rel-keyword').style.color = target.value; }
+  } else if(erow){
+    const e = block.events.find(x=>x.id===erow.dataset.eventId);
+    e[field] = target.value;
+    if(field==='color'){ erow.querySelector('.event-textarea').style.color = target.value; }
+  } else if(field==='year' || field==='month' || field==='day'){
+    block[field] = target.value;
+  }
+});
+
+blocksContainer.addEventListener('change',(ev)=>{
+  const target = ev.target;
+  if(target.dataset.field==='font'){
+    const blockEl = target.closest('.timeline-block');
+    const block = state.blocks.find(b=>b.id===blockEl.dataset.blockId);
+    block.font = target.value;
+    blockEl.style.fontFamily = block.font ? fontStack(block.font) : '';
+  }
+  if(target.dataset.action==='upload-image'){
+    const file = target.files && target.files[0];
+    if(!file) return;
+    const blockEl = target.closest('.timeline-block');
+    const block = state.blocks.find(b=>b.id===blockEl.dataset.blockId);
+    const pcard = target.closest('.profile-card');
+    const p = block.profiles.find(x=>x.id===pcard.dataset.profileId);
+    const reader = new FileReader();
+    reader.onload = function(e2){
+      p.image = e2.target.result;
+      renderBlocks();
+    };
+    reader.readAsDataURL(file);
+  }
+});
+
+/* ================= 툴바 동작 ================= */
+function addBlock(){
+  state.blocks.push(newBlock());
+  renderBlocks();
+  window.scrollTo({top:document.body.scrollHeight, behavior:'smooth'});
+}
+document.getElementById('addBlockBtnTop').onclick = addBlock;
+document.getElementById('addBlockBtnBottom').onclick = addBlock;
+
+document.getElementById('globalFontSelect').onchange = (e)=>{
+  state.globalFont = e.target.value;
+  document.getElementById('canvas').style.fontFamily = fontStack(state.globalFont);
+};
+
+function updateLineClass(){
+  const canvas = document.getElementById('canvas');
+  canvas.className = canvas.className.split(' ').filter(c=>!c.startsWith('line-')).join(' ').trim();
+  canvas.classList.add('line-'+state.lineStyle);
+}
+document.getElementById('lineStyleSelect').onchange = (e)=>{ state.lineStyle = e.target.value; updateLineClass(); };
+
+function applyBackground(){
+  const canvas = document.getElementById('canvas');
+  canvas.style.background = state.bgType==='gradient'
+    ? `linear-gradient(160deg, ${state.bgColor1}, ${state.bgColor2})`
+    : state.bgColor1;
+}
+document.getElementById('bgTypeSelect').onchange = (e)=>{
+  state.bgType = e.target.value;
+  document.getElementById('bgColor2').style.display = state.bgType==='gradient' ? 'inline-block' : 'none';
+  applyBackground();
+};
+document.getElementById('bgColor1').oninput = (e)=>{ state.bgColor1 = e.target.value; applyBackground(); };
+document.getElementById('bgColor2').oninput = (e)=>{ state.bgColor2 = e.target.value; applyBackground(); };
+
+function applyMode(){
+  const canvas = document.getElementById('canvas');
+  canvas.classList.toggle('mode-preview', state.mode==='preview');
+  document.getElementById('modeToggleBtn').textContent = state.mode==='edit' ? '프리뷰 모드' : '편집 모드로 돌아가기';
+}
+document.getElementById('modeToggleBtn').onclick = ()=>{
+  state.mode = state.mode==='edit' ? 'preview' : 'edit';
+  applyMode();
+};
+
+function updateCommissionEmptyState(){
+  const wrap = document.getElementById('commissionWrap');
+  const empty = !state.commissionSource || !state.commissionSource.trim();
+  wrap.classList.toggle('is-empty', empty);
+  document.getElementById('commissionPrefix').style.display = empty ? 'none' : 'inline';
+}
+document.getElementById('commissionInput').oninput = (e)=>{
+  state.commissionSource = e.target.value;
+  updateCommissionEmptyState();
+};
+
+/* JSON 내보내기/불러오기 */
+document.getElementById('exportJsonBtn').onclick = ()=>{
+  const dataStr = JSON.stringify(state, null, 2);
+  const blob = new Blob([dataStr], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `pair-timeline-${new Date().toISOString().slice(0,10)}.json`;
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+};
+
+document.getElementById('importJsonBtn').onclick = ()=> document.getElementById('jsonImportInput').click();
+document.getElementById('jsonImportInput').onchange = (e)=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev)=>{
+    try{
+      const imported = JSON.parse(ev.target.result);
+      if(!imported || !Array.isArray(imported.blocks)) throw new Error('invalid');
+      state = Object.assign({
+        globalFont:'Pretendard', lineStyle:'solid', bgType:'gradient',
+        bgColor1:'#fdf5f8', bgColor2:'#eee3f6', commissionSource:'', mode:'edit', blocks:[]
+      }, imported);
+      applyAllSettingsToUI();
+      renderBlocks();
+    }catch(err){
+      alert('JSON 파일을 불러오는 중 오류가 발생했습니다. 파일 형식을 확인해주세요.');
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+};
+
+function applyAllSettingsToUI(){
+  document.getElementById('globalFontSelect').innerHTML = fontOptionsHTML(state.globalFont, false);
+  document.getElementById('lineStyleSelect').value = state.lineStyle;
+  document.getElementById('bgTypeSelect').value = state.bgType;
+  document.getElementById('bgColor1').value = state.bgColor1;
+  document.getElementById('bgColor2').value = state.bgColor2;
+  document.getElementById('bgColor2').style.display = state.bgType==='gradient' ? 'inline-block' : 'none';
+  document.getElementById('commissionInput').value = state.commissionSource;
+  updateCommissionEmptyState();
+  document.getElementById('canvas').style.fontFamily = fontStack(state.globalFont);
+  applyBackground();
+  updateLineClass();
+  applyMode();
+}
+
+/* 사용 방법 오버레이 */
+document.getElementById('helpConfirmBtn').onclick = ()=>{
+  document.getElementById('helpOverlay').classList.add('hidden');
+};
+document.getElementById('helpBtn').onclick = ()=>{
+  document.getElementById('helpOverlay').classList.remove('hidden');
+};
+
+/* PNG 내보내기 */
+document.getElementById('exportPngBtn').onclick = async ()=>{
+  const canvas = document.getElementById('canvas');
+  const wasEdit = state.mode === 'edit';
+  if(wasEdit){ state.mode = 'preview'; applyMode(); }
+  await new Promise(r=>setTimeout(r, 60));
+  try{
+    const rendered = await html2canvas(canvas, {backgroundColor:null, scale:2, useCORS:true});
+    rendered.toBlob((blob)=>{
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `pair-timeline-${Date.now()}.png`;
+      document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+    });
+  }catch(err){
+    alert('PNG로 저장하는 중 오류가 발생했습니다: ' + err.message);
+  }
+  if(wasEdit){ state.mode = 'edit'; applyMode(); }
+};
+
+/* ================= 초기화 ================= */
+renderBlocks();
+applyAllSettingsToUI();
+</script>
+</body>
+</html>
