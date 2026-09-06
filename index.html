@@ -26,21 +26,21 @@
   src:url('https://cdn.jsdelivr.net/gh/fonts-archive/GmarketSans/GmarketSansBold.woff2') format('woff2'); }
 
 :root{
-  --ink:#39303f;
-  --muted:#9a8fa8;
-  --accent:#a683c9;
-  --accent-dark:#7c56a8;
-  --accent-soft:#f1e8fa;
-  --blush:#f6c6d6;
-  --blush-dark:#d97e9a;
-  --sage:#9dc2a0;
-  --sage-dark:#5c9366;
-  --paper:#fffdfb;
-  --border:#ecdff2;
-  --line-color:#cbb3e6;
-  --dot-color:#a683c9;
-  --shadow:0 4px 18px rgba(124,86,168,0.12);
-  --shadow-soft:0 2px 9px rgba(124,86,168,0.08);
+  --ink:#2c2c2e;
+  --muted:#8e8e93;
+  --accent:#7fa8c9;
+  --accent-dark:#3f6485;
+  --accent-soft:#eef2f5;
+  --blush:#d9b8a3;
+  --blush-dark:#a67c62;
+  --sage:#a9c2b0;
+  --sage-dark:#5f7f6c;
+  --paper:#ffffff;
+  --border:#e2e4e7;
+  --line-color:#c7ccd1;
+  --dot-color:#5e7ea3;
+  --shadow:0 4px 18px rgba(63,100,133,0.12);
+  --shadow-soft:0 2px 9px rgba(63,100,133,0.08);
   --radius:18px;
   --font-global:'Pretendard','Noto Sans KR',sans-serif;
 }
@@ -50,9 +50,9 @@ html,body{margin:0;padding:0;}
 body{
   font-family:'Pretendard','Noto Sans KR',sans-serif;
   background:
-    radial-gradient(circle at 10% 6%, #f7ecfa 0%, transparent 42%),
-    radial-gradient(circle at 90% 94%, #eef4ec 0%, transparent 38%),
-    #efe9f4;
+    radial-gradient(circle at 10% 6%, #eef2f6 0%, transparent 42%),
+    radial-gradient(circle at 90% 94%, #eceef1 0%, transparent 38%),
+    #eef0f2;
   color:var(--ink);
   min-height:100vh;
   padding-bottom:60px;
@@ -134,12 +134,13 @@ button{font-family:inherit; cursor:pointer; border:none;}
 #canvasWrapper{ padding:36px 18px 10px; display:flex; justify-content:center; }
 #canvas{
   width:100%; max-width:900px;
-  background:linear-gradient(160deg, #fdf5f8, #eee3f6);
+  background:linear-gradient(160deg, #f5f6f8, #e9ebee);
   border-radius:24px;
   padding:42px 34px 28px;
-  box-shadow:0 16px 46px rgba(124,86,168,0.16), inset 0 1px 0 rgba(255,255,255,0.6);
+  box-shadow:0 16px 46px rgba(63,100,133,0.16), inset 0 1px 0 rgba(255,255,255,0.6);
   position:relative;
   font-family:var(--font-global);
+  color:var(--ink);
 }
 
 #blocksContainer{display:flex; flex-direction:column;}
@@ -346,7 +347,8 @@ button{font-family:inherit; cursor:pointer; border:none;}
 .warning-icon{flex-shrink:0;}
 .warning-genre-input{
   border:1px solid #f0dcae; border-radius:7px; padding:3px 7px; font-size:12.5px; font-weight:700;
-  color:#8a6a1f; background:#fffdf6; width:90px; text-align:center;
+  color:#8a6a1f; background:#fffdf6; width:44px; min-width:44px; max-width:220px; text-align:center;
+  transition:width .08s ease;
 }
 .warning-custom-input{
   flex:1; min-width:120px; border:1px solid #f0dcae; border-radius:7px; padding:5px 9px;
@@ -472,8 +474,18 @@ button{font-family:inherit; cursor:pointer; border:none;}
         <option value="arrow">화살표</option>
       </select>
     </label>
-    <input type="color" id="lineColorPicker" class="tiny-color" value="#cbb3e6" title="연결선 색상">
-    <input type="color" id="dotColorPicker" class="tiny-color" value="#a683c9" title="타임라인 동그라미 색상">
+    <input type="color" id="lineColorPicker" class="tiny-color" value="#c7ccd1" title="연결선 색상">
+    <input type="color" id="dotColorPicker" class="tiny-color" value="#5e7ea3" title="타임라인 동그라미 색상">
+
+    <label class="toolbar-field">테마
+      <select id="themeSelect">
+        <option value="pastel">그레이 블루 (기본)</option>
+        <option value="dark">다크모드</option>
+        <option value="sage">세이지</option>
+        <option value="teal">틸 그린</option>
+        <option value="rosegray">로즈 그레이</option>
+      </select>
+    </label>
 
     <label class="toolbar-field">배경
       <select id="bgTypeSelect">
@@ -481,8 +493,8 @@ button{font-family:inherit; cursor:pointer; border:none;}
         <option value="solid">단색</option>
       </select>
     </label>
-    <input type="color" id="bgColor1" class="tiny-color" value="#fdf5f8" title="배경색 1">
-    <input type="color" id="bgColor2" class="tiny-color" value="#eee3f6" title="배경색 2 (그라데이션)">
+    <input type="color" id="bgColor1" class="tiny-color" value="#f5f6f8" title="배경색 1">
+    <input type="color" id="bgColor2" class="tiny-color" value="#e9ebee" title="배경색 2 (그라데이션)">
 
     <label class="toolbar-field">경고문구
       <button type="button" id="addSpoilerBtn" class="btn-secondary">⚠️ 스포일러</button>
@@ -504,7 +516,7 @@ button{font-family:inherit; cursor:pointer; border:none;}
         <input id="pairNameInput" class="pair-name-input" value="PAIR NAME" maxlength="40"><span class="pair-name-suffix"> TIMELINE</span>
       </div>
       <div class="title-color-picker-wrap only-edit">
-        <input type="color" id="titleColorPicker" class="tiny-color" value="#7c56a8" title="제목 색상">
+        <input type="color" id="titleColorPicker" class="tiny-color" value="#3f6485" title="제목 색상">
         <select id="titleFontSelect" class="title-font-select" title="제목 전용 폰트"></select>
       </div>
     </div>
@@ -576,20 +588,109 @@ function fontOptionsHTML(selected, includeFollowGlobal){
   return html;
 }
 
-const DEFAULT_TITLE_COLORS = { profiles:'#7c56a8', relationships:'#5c9366', events:'#d97e9a' };
+const DEFAULT_TITLE_COLORS = { profiles:'#3f6485', relationships:'#5f7f6c', events:'#a67c62' };
+
+/* ================= 테마 프리셋 ================= */
+const THEMES = {
+  pastel:{ ink:'#2c2c2e', muted:'#8e8e93', accent:'#7fa8c9', accentDark:'#3f6485', accentSoft:'#eef2f5',
+    blush:'#d9b8a3', blushDark:'#a67c62', sage:'#a9c2b0', sageDark:'#5f7f6c',
+    paper:'#ffffff', border:'#e2e4e7', lineColor:'#c7ccd1', dotColor:'#5e7ea3',
+    bgColor1:'#f5f6f8', bgColor2:'#e9ebee', titleColor:'#3f6485' },
+  dark:{ ink:'#e5e5e7', muted:'#9a9a9e', accent:'#6ea8dc', accentDark:'#8fc1ef', accentSoft:'#24313d',
+    blush:'#d9b8a3', blushDark:'#e6c7b5', sage:'#9fc2ab', sageDark:'#b8d9c2',
+    paper:'#242426', border:'#3a3a3d', lineColor:'#55565a', dotColor:'#6ea8dc',
+    bgColor1:'#1c1c1e', bgColor2:'#262628', titleColor:'#cfe3f5' },
+  sage:{ ink:'#47543f', muted:'#8a9884', accent:'#a1bc98', accentDark:'#778873', accentSoft:'#eef1e9',
+    blush:'#dccfc0', blushDark:'#b89a80', sage:'#a1bc98', sageDark:'#778873',
+    paper:'#fdf6ed', border:'#ecdfd0', lineColor:'#c2b39e', dotColor:'#778873',
+    bgColor1:'#fdf6ed', bgColor2:'#dccfc0', titleColor:'#5e6e56' },
+  teal:{ ink:'#33463f', muted:'#7d9c92', accent:'#88bda4', accentDark:'#4c766b', accentSoft:'#eef7f1',
+    blush:'#b1d3b9', blushDark:'#6fa38f', sage:'#88bda4', sageDark:'#4c766b',
+    paper:'#fbfdf9', border:'#dbe9de', lineColor:'#a9cdb7', dotColor:'#659287',
+    bgColor1:'#f6faf1', bgColor2:'#e6f2dd', titleColor:'#3f6358' },
+  rosegray:{ ink:'#4a4a4a', muted:'#8f8f8f', accent:'#e2b4bd', accentDark:'#b98089', accentSoft:'#fdeeee',
+    blush:'#f7d6d0', blushDark:'#cf9992', sage:'#e2b4bd', sageDark:'#4a4a4a',
+    paper:'#fff5f5', border:'#f3dcd8', lineColor:'#e6c3bd', dotColor:'#4a4a4a',
+    bgColor1:'#fff5f5', bgColor2:'#f7d6d0', titleColor:'#4a4a4a' }
+};
+function themeRoleColor(role){
+  const t = THEMES[state.themeKey] || THEMES.pastel;
+  if(role==='profiles') return t.accentDark;
+  if(role==='relationships') return t.sageDark;
+  if(role==='events') return t.blushDark;
+  if(role==='date') return t.accentDark;
+  if(role==='relationshipText') return t.accent;
+  return t.ink;
+}
+function applyThemeVars(key){
+  const t = THEMES[key] || THEMES.pastel;
+  const canvas = document.getElementById('canvas');
+  canvas.style.setProperty('--ink', t.ink);
+  canvas.style.setProperty('--muted', t.muted);
+  canvas.style.setProperty('--accent', t.accent);
+  canvas.style.setProperty('--accent-dark', t.accentDark);
+  canvas.style.setProperty('--accent-soft', t.accentSoft);
+  canvas.style.setProperty('--blush', t.blush);
+  canvas.style.setProperty('--blush-dark', t.blushDark);
+  canvas.style.setProperty('--sage', t.sage);
+  canvas.style.setProperty('--sage-dark', t.sageDark);
+  canvas.style.setProperty('--paper', t.paper);
+  canvas.style.setProperty('--border', t.border);
+}
+function applyTheme(key){
+  const t = THEMES[key];
+  if(!t) return;
+  state.themeKey = key;
+  applyThemeVars(key);
+  state.lineColor = t.lineColor;
+  state.dotColor = t.dotColor;
+  state.bgColor1 = t.bgColor1;
+  state.bgColor2 = t.bgColor2;
+  state.bgType = 'gradient';
+  state.titleColor = t.titleColor;
+  document.getElementById('lineColorPicker').value = t.lineColor;
+  document.getElementById('dotColorPicker').value = t.dotColor;
+  document.getElementById('bgColor1').value = t.bgColor1;
+  document.getElementById('bgColor2').value = t.bgColor2;
+  document.getElementById('bgColor2').style.display = 'inline-block';
+  document.getElementById('bgTypeSelect').value = 'gradient';
+  document.getElementById('titleColorPicker').value = t.titleColor;
+  const titleEl = document.querySelector('.canvas-title');
+  if(titleEl) titleEl.style.color = t.titleColor;
+  applyBackground();
+  applyLineDotColors();
+
+  /* 날짜 · 캐릭터 프로필 · 관계도 · 주요 사건의 제목/본문 색상도 테마에 맞게 갱신 */
+  state.blocks.forEach(block=>{
+    block.dateColor = t.accentDark;
+    block.titleColors = { profiles:t.accentDark, relationships:t.sageDark, events:t.blushDark };
+    block.profiles.forEach(p=>{ p.color = t.ink; });
+    block.relationships.forEach(r=>{ r.color = t.accent; });
+    block.events.forEach(e=>{ e.color = t.ink; });
+  });
+  renderBlocks();
+
+  /* 앞으로의 이야기 제목·선 색상도 테마에 맞게 갱신 */
+  if(state.futureNote){
+    state.futureNote.titleColor = t.accentDark;
+    state.futureNote.shapeColor = t.dotColor;
+    renderFutureNote();
+  }
+}
 
 /* ================= 상태 ================= */
 let state = {
   globalFont:'Pretendard',
   pairName:'PAIR NAME',
   titleFont:'',
-  titleColor:'#7c56a8',
+  titleColor:'#3f6485',
+  themeKey:'pastel',
   lineStyle:'solid',
-  lineColor:'#cbb3e6',
-  dotColor:'#a683c9',
+  lineColor:'#c7ccd1',
+  dotColor:'#5e7ea3',
   bgType:'gradient',
-  bgColor1:'#fdf5f8',
-  bgColor2:'#eee3f6',
+  bgColor1:'#f5f6f8',
+  bgColor2:'#e9ebee',
   commissionSource:'',
   mode:'edit',
   warnings:[],
@@ -626,19 +727,19 @@ function initAffiliationWidths(){
 }
 
 function newBlock(){
-  return { id:uid('block'), year:'2024', month:'01', day:'01', showMonth:true, showDay:true, font:'', dateColor:'#7c56a8',
-    titleColors:Object.assign({}, DEFAULT_TITLE_COLORS),
+  return { id:uid('block'), year:'2024', month:'01', day:'01', showMonth:true, showDay:true, font:'', dateColor:themeRoleColor('date'),
+    titleColors:{ profiles:themeRoleColor('profiles'), relationships:themeRoleColor('relationships'), events:themeRoleColor('events') },
     profiles:[], relationships:[], events:[] };
 }
 function newProfile(){
   return { id:uid('prof'), name:'', age:'', affiliation:'', status:'', statusSlot:false, image:'', imageSlot:true,
-    color:'#3c3440', bold:false, italic:false, underline:false };
+    color:themeRoleColor('body'), bold:false, italic:false, underline:false };
 }
 function newRelationship(){
-  return { id:uid('rel'), charA:'', keyword:'', charB:'', color:'#9b7fc9' };
+  return { id:uid('rel'), charA:'', keyword:'', charB:'', color:themeRoleColor('relationshipText') };
 }
 function newEvent(){
-  return { id:uid('evt'), text:'', color:'#3c3440', bold:false, italic:false, underline:false };
+  return { id:uid('evt'), text:'', color:themeRoleColor('body'), bold:false, italic:false, underline:false };
 }
 
 /* 시작 예시 블록 */
@@ -749,7 +850,7 @@ function sectionHTML(block, key){
 function dateRowHTML(block){
   const showMonth = block.showMonth !== false;
   const showDay = block.showDay !== false;
-  const dateColor = block.dateColor || '#7c56a8';
+  const dateColor = block.dateColor || '#3f6485';
   let html = `<div class="date-row">
     <div class="date-fields" style="color:${dateColor}">
       <input type="text" class="date-input year-input" data-field="year" value="${esc(block.year)}" maxlength="4"><span class="date-unit">년</span>`;
@@ -831,6 +932,7 @@ function warningHTML(w){
 }
 function renderWarnings(){
   warningsContainer.innerHTML = state.warnings.map(warningHTML).join('');
+  warningsContainer.querySelectorAll('.warning-genre-input').forEach(el=>autoGrowInput(el, 44, 220, 10));
 }
 warningsContainer.addEventListener('click',(ev)=>{
   const btn = ev.target.closest('[data-action="remove-warning"]');
@@ -847,6 +949,7 @@ warningsContainer.addEventListener('input',(ev)=>{
   if(!wrap) return;
   const w = state.warnings.find(x=>x.id===wrap.dataset.warningId);
   if(w) w[field] = target.value;
+  if(field==='genre'){ autoGrowInput(target, 44, 220, 10); }
 });
 document.getElementById('addSpoilerBtn').onclick = ()=>{ state.warnings.push(newWarning('spoiler')); renderWarnings(); };
 document.getElementById('addTriggerBtn').onclick = ()=>{ state.warnings.push(newWarning('trigger')); renderWarnings(); };
@@ -856,8 +959,8 @@ document.getElementById('addCustomWarningBtn').onclick = ()=>{ state.warnings.pu
 const futureNoteContainer = document.getElementById('futureNoteContainer');
 function futureNoteHTML(){
   const shape = state.futureNote.shape || 'dashed';
-  const titleColor = state.futureNote.titleColor || '#7c56a8';
-  const shapeColor = state.futureNote.shapeColor || '#a683c9';
+  const titleColor = state.futureNote.titleColor || '#3f6485';
+  const shapeColor = state.futureNote.shapeColor || '#5e7ea3';
   const shapeColorLabel = shape==='soft' ? '전체 색상' : shape==='bubble' ? '말풍선 선 색' : shape==='solid' ? '실선 색' : '점선 색';
   return `
   <div class="future-note-card shape-${shape}" style="--future-shape-color:${shapeColor}">
@@ -889,7 +992,8 @@ futureNoteContainer.addEventListener('click',(ev)=>{
   const btn = ev.target.closest('[data-action]');
   if(!btn) return;
   if(btn.dataset.action==='add-future-note'){
-    state.futureNote = { text:'', shape:'dashed', titleColor:'#7c56a8', shapeColor:'#a683c9' };
+    const t = THEMES[state.themeKey] || THEMES.pastel;
+    state.futureNote = { text:'', shape:'dashed', titleColor:t.accentDark, shapeColor:t.dotColor };
     renderFutureNote();
   } else if(btn.dataset.action==='remove-future-note'){
     state.futureNote = null;
@@ -934,6 +1038,7 @@ document.getElementById('titleColorPicker').oninput = (e)=>{
   state.titleColor = e.target.value;
   document.querySelector('.canvas-title').style.color = e.target.value;
 };
+document.getElementById('themeSelect').onchange = (e)=>{ applyTheme(e.target.value); };
 
 /* ================= 이벤트 위임 ================= */
 blocksContainer.addEventListener('click',(ev)=>{
@@ -1218,8 +1323,8 @@ document.getElementById('jsonImportInput').onchange = (e)=>{
       const imported = JSON.parse(ev.target.result);
       if(!imported || !Array.isArray(imported.blocks)) throw new Error('invalid');
       state = Object.assign({
-        globalFont:'Pretendard', pairName:'PAIR NAME', titleFont:'', titleColor:'#7c56a8', lineStyle:'solid', lineColor:'#cbb3e6', dotColor:'#a683c9', bgType:'gradient',
-        bgColor1:'#fdf5f8', bgColor2:'#eee3f6', commissionSource:'', mode:'edit', warnings:[], futureNote:null, blocks:[]
+        globalFont:'Pretendard', pairName:'PAIR NAME', titleFont:'', titleColor:'#3f6485', themeKey:'pastel', lineStyle:'solid', lineColor:'#c7ccd1', dotColor:'#5e7ea3', bgType:'gradient',
+        bgColor1:'#f5f6f8', bgColor2:'#e9ebee', commissionSource:'', mode:'edit', warnings:[], futureNote:null, blocks:[]
       }, imported);
       applyAllSettingsToUI();
       renderBlocks();
@@ -1234,6 +1339,8 @@ document.getElementById('jsonImportInput').onchange = (e)=>{
 };
 
 function applyAllSettingsToUI(){
+  applyThemeVars(state.themeKey || 'pastel');
+  document.getElementById('themeSelect').value = state.themeKey || 'pastel';
   document.getElementById('globalFontSelect').innerHTML = fontOptionsHTML(state.globalFont, false);
   document.getElementById('pairNameInput').value = state.pairName;
   autoGrowInput(document.getElementById('pairNameInput'), 60, 480, 14);
