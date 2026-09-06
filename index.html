@@ -261,11 +261,19 @@ button{font-family:inherit; cursor:pointer; border:none;}
 .hidden-file-input{ position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; }
 .no-image-slot{ padding:6px 0 2px; text-align:center; }
 .profile-fields{display:flex; flex-direction:column; gap:6px;}
-.p-name{font-weight:700; text-align:center;}
+.p-name{
+  font-weight:700; text-align:center;
+  border:1px solid var(--border); border-radius:9px; padding:6px 8px; background:#fff;
+}
 .p-row{display:flex; flex-wrap:wrap; gap:4px; align-items:center;}
-.p-small{font-size:11.5px;}
+.p-small{
+  font-size:11.5px;
+  border:1px solid var(--border); border-radius:9px; padding:6px 8px; background:#fff;
+}
 .p-age{flex:0 0 50px; width:50px; text-align:center;}
-.p-affiliation{flex:0 0 auto; width:56px; min-width:56px; max-width:128px; text-align:center; transition:width .08s ease;}
+.p-affiliation{
+  flex:0 0 auto; display:inline-block; width:auto; min-width:40px; max-width:128px; text-align:center;
+}
 .p-status-row{display:flex; align-items:center; gap:5px;}
 .p-status{flex:1; min-width:0;}
 .p-status-remove{width:20px; height:20px; font-size:10px;}
@@ -282,7 +290,10 @@ button{font-family:inherit; cursor:pointer; border:none;}
   display:flex; align-items:center; gap:6px; flex-wrap:wrap;
   background:#fff; border:1px solid var(--border); border-radius:12px; padding:9px 11px;
 }
-.rel-input{flex:1; min-width:70px; font-size:13px; text-align:center;}
+.rel-input{
+  flex:1; min-width:70px; font-size:13px; text-align:center;
+  border:1px solid var(--border); border-radius:9px; padding:6px 8px; background:#fff;
+}
 .rel-keyword{
   flex:0 0 auto; display:inline-block; min-width:80px; max-width:240px; width:auto;
   font-size:13px; text-align:center; font-weight:700; font-family:inherit; line-height:1.4;
@@ -299,7 +310,6 @@ button{font-family:inherit; cursor:pointer; border:none;}
   border:1px solid var(--border); border-radius:9px;
   padding:9px; font-family:inherit; font-size:13.5px; line-height:1.55; outline:none; background:#fff;
 }
-.event-textarea:empty::before{ content:attr(data-placeholder); color:var(--muted); }
 .event-row .style-row{justify-content:flex-start; padding-top:7px;}
 
 .add-block-bottom{ display:flex; justify-content:center; margin-top:4px; margin-bottom:22px; }
@@ -311,8 +321,8 @@ button{font-family:inherit; cursor:pointer; border:none;}
 .commission-wrap{display:flex; align-items:center; gap:3px;}
 .commission-prefix{font-size:11.5px; color:var(--muted); font-weight:700;}
 .commission-input{
-  font-size:11.5px; color:var(--muted); border:1px dashed var(--border); border-radius:8px;
-  padding:6px 10px; min-width:150px; background:transparent; font-family:inherit;
+  display:inline-block; font-size:11.5px; color:var(--muted); border:1px dashed var(--border); border-radius:8px;
+  padding:6px 10px; min-width:60px; max-width:280px; background:transparent; font-family:inherit;
 }
 .watermark{
   font-size:11.5px; color:var(--muted); font-weight:600; letter-spacing:.02em; white-space:nowrap;
@@ -328,12 +338,11 @@ button{font-family:inherit; cursor:pointer; border:none;}
   text-align:center; display:flex; align-items:baseline; justify-content:center; flex-wrap:wrap;
 }
 .pair-name-input{
-  border:none; background:transparent; text-align:right; font:inherit; color:inherit;
+  display:inline-block; border:none; background:transparent; text-align:right; font:inherit; color:inherit;
   font-weight:800; letter-spacing:inherit; padding:2px 4px; border-radius:8px;
   width:auto; min-width:40px;
 }
 #canvas .canvas-title .pair-name-input{ font-size:inherit; }
-#canvas.mode-preview .pair-name-input{ pointer-events:auto; }
 .pair-name-input:hover, .pair-name-input:focus{ background:var(--accent-soft); outline:none; }
 .pair-name-suffix{ font:inherit; color:inherit; }
 .title-color-picker-wrap{
@@ -354,9 +363,8 @@ button{font-family:inherit; cursor:pointer; border:none;}
 }
 .warning-icon{flex-shrink:0;}
 .warning-genre-input{
-  border:1px solid #f0dcae; border-radius:7px; padding:3px 7px; font-size:12.5px; font-weight:700;
-  color:#8a6a1f; background:#fffdf6; width:44px; min-width:44px; max-width:220px; text-align:center;
-  transition:width .08s ease;
+  display:inline-block; border:1px solid #f0dcae; border-radius:7px; padding:3px 7px; font-size:12.5px; font-weight:700;
+  color:#8a6a1f; background:#fffdf6; width:auto; min-width:30px; max-width:220px; text-align:center;
 }
 .warning-custom-input{
   flex:1; min-width:120px; border:1px solid #f0dcae; border-radius:7px; padding:5px 9px;
@@ -401,7 +409,6 @@ button{font-family:inherit; cursor:pointer; border:none;}
   border:1px solid var(--border); border-radius:9px;
   padding:10px; font-family:inherit; font-size:13.5px; line-height:1.6; background:#fff; outline:none; color:inherit;
 }
-.future-note-textarea:empty::before{ content:attr(data-placeholder); color:var(--muted); }
 
 /* 공통 입력 요소 */
 #canvas input, #canvas textarea, #canvas select{
@@ -410,6 +417,10 @@ button{font-family:inherit; cursor:pointer; border:none;}
 #canvas .content-input{
   border:1px solid var(--border); border-radius:9px; padding:6px 8px; background:#fff;
 }
+.ce-field{
+  outline:none; white-space:pre-wrap; word-break:break-word; overflow-wrap:break-word; cursor:text;
+}
+.ce-field:empty::before{ content:attr(data-placeholder); color:var(--muted); }
 
 /* ---------- 프리뷰 모드 ---------- */
 #canvas.mode-preview .only-edit{ display:none !important; }
@@ -422,6 +433,9 @@ button{font-family:inherit; cursor:pointer; border:none;}
 #canvas.mode-preview .warning-genre-input,
 #canvas.mode-preview .warning-custom-input,
 #canvas.mode-preview .future-note-textarea,
+#canvas.mode-preview .p-name,
+#canvas.mode-preview .p-small,
+#canvas.mode-preview .p-affiliation,
 #canvas.mode-preview .commission-input{
   border-color:transparent !important; background:transparent !important; pointer-events:none; resize:none;
 }
@@ -523,7 +537,7 @@ button{font-family:inherit; cursor:pointer; border:none;}
   <div id="canvas" class="line-solid">
     <div class="canvas-title-row">
       <div class="canvas-title">
-        <input id="pairNameInput" class="pair-name-input" value="PAIR NAME" maxlength="40"><span class="pair-name-suffix"> TIMELINE</span>
+        <div id="pairNameInput" class="ce-field pair-name-input" contenteditable="true" data-placeholder="PAIR NAME">PAIR NAME</div><span class="pair-name-suffix"> TIMELINE</span>
       </div>
       <div class="title-color-picker-wrap only-edit">
         <input type="color" id="titleColorPicker" class="tiny-color" value="#3f6485" title="제목 색상">
@@ -539,7 +553,7 @@ button{font-family:inherit; cursor:pointer; border:none;}
     <div class="canvas-footer">
       <div id="commissionWrap" class="commission-wrap is-empty">
         <span id="commissionPrefix" class="commission-prefix" style="display:none;">ⓒ</span>
-        <input id="commissionInput" class="commission-input" placeholder="커미션 출처">
+        <div id="commissionInput" class="ce-field commission-input" contenteditable="true" data-placeholder="커미션 출처"></div>
       </div>
       <div class="watermark">@S30N6UN / @30M1__</div>
     </div>
@@ -711,30 +725,6 @@ let state = {
 function uid(p){ return p+'_'+Math.random().toString(36).slice(2,9); }
 function esc(s){ return (s==null?'':String(s)).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-/* 소속 입력칸 글자 길이에 맞춰 너비 자동 조절 */
-let _measureCanvas = null;
-function measureTextWidth(text, font){
-  if(!_measureCanvas) _measureCanvas = document.createElement('canvas');
-  const ctx = _measureCanvas.getContext('2d');
-  ctx.font = font;
-  return ctx.measureText(text).width;
-}
-function autoGrowInput(inputEl, minW, maxW, buffer){
-  if(!inputEl) return;
-  minW = minW || 56; maxW = maxW || 128; buffer = buffer===undefined ? 8 : buffer;
-  const cs = getComputedStyle(inputEl);
-  const font = `${cs.fontStyle} ${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
-  const text = inputEl.value || inputEl.getAttribute('placeholder') || '';
-  const textWidth = measureTextWidth(text, font);
-  const paddingH = (parseFloat(cs.paddingLeft)||0) + (parseFloat(cs.paddingRight)||0);
-  const borderH = (parseFloat(cs.borderLeftWidth)||0) + (parseFloat(cs.borderRightWidth)||0);
-  let w = textWidth + paddingH + borderH + buffer;
-  w = Math.max(minW, Math.min(maxW, w));
-  inputEl.style.width = w + 'px';
-}
-function initAffiliationWidths(){
-  blocksContainer.querySelectorAll('.p-affiliation').forEach(el=>autoGrowInput(el));
-}
 function normalizeEditableEmpty(el){
   if(el && el.isContentEditable && el.textContent.trim()===''){ el.innerHTML=''; }
 }
@@ -755,6 +745,7 @@ function handleEditableKeydown(ev){
   sel.addRange(range);
   target.dispatchEvent(new Event('input', {bubbles:true}));
 }
+document.getElementById('canvas').addEventListener('keydown', handleEditableKeydown);
 
 function newBlock(){
   return { id:uid('block'), year:'2024', month:'01', day:'01', showMonth:true, showDay:true, font:'', dateColor:themeRoleColor('date'),
@@ -801,7 +792,7 @@ function profileHTML(p){
     </div>`;
   const statusPart = p.statusSlot ? `
       <div class="p-status-row">
-        <input class="content-input p-small p-status" data-field="status" placeholder="상태" value="${esc(p.status)}">
+        <div class="ce-field p-small p-status" contenteditable="true" data-field="status" data-placeholder="상태">${esc(p.status)}</div>
         <button type="button" class="btn-icon danger only-edit p-status-remove" data-action="remove-status-slot" title="상태 칸 삭제">✕</button>
       </div>` : `
       <div class="only-edit"><button type="button" class="btn-tiny" data-action="add-status-slot">+ 상태 추가</button></div>`;
@@ -809,10 +800,10 @@ function profileHTML(p){
   <div class="profile-card" data-profile-id="${p.id}">
     ${imagePart}
     <div class="profile-fields" style="${styleStr}">
-      <input class="content-input p-name" data-field="name" placeholder="이름" value="${esc(p.name)}">
+      <div class="ce-field p-name" contenteditable="true" data-field="name" data-placeholder="이름">${esc(p.name)}</div>
       <div class="p-row">
-        <input class="content-input p-small p-age" data-field="age" placeholder="나이" value="${esc(p.age)}">
-        <input class="content-input p-small p-affiliation" data-field="affiliation" placeholder="소속" value="${esc(p.affiliation)}">
+        <div class="ce-field p-small p-age" contenteditable="true" data-field="age" data-placeholder="나이">${esc(p.age)}</div>
+        <div class="ce-field p-small p-affiliation" contenteditable="true" data-field="affiliation" data-placeholder="소속">${esc(p.affiliation)}</div>
       </div>
       ${statusPart}
     </div>
@@ -829,11 +820,11 @@ function profileHTML(p){
 function relationshipHTML(r){
   return `
   <div class="relationship-row" data-rel-id="${r.id}">
-    <input class="content-input rel-input" data-field="charA" placeholder="캐릭터 A" value="${esc(r.charA)}">
+    <div class="ce-field rel-input" contenteditable="true" data-field="charA" data-placeholder="캐릭터 A">${esc(r.charA)}</div>
     <span class="rel-arrow">↔</span>
-    <div class="rel-keyword" contenteditable="true" data-field="keyword" data-placeholder="관계 키워드" style="color:${r.color}">${esc(r.keyword)}</div>
+    <div class="ce-field rel-keyword" contenteditable="true" data-field="keyword" data-placeholder="관계 키워드" style="color:${r.color}">${esc(r.keyword)}</div>
     <span class="rel-arrow">↔</span>
-    <input class="content-input rel-input" data-field="charB" placeholder="캐릭터 B" value="${esc(r.charB)}">
+    <div class="ce-field rel-input" contenteditable="true" data-field="charB" data-placeholder="캐릭터 B">${esc(r.charB)}</div>
     <input type="color" class="color-picker only-edit" data-field="color" value="${r.color}" title="키워드 색상">
     <button type="button" class="btn-icon danger only-edit" data-action="remove-relationship">✕</button>
   </div>`;
@@ -843,7 +834,7 @@ function eventHTML(e){
   const styleStr = `color:${e.color};${e.bold?'font-weight:700;':'font-weight:400;'}${e.italic?'font-style:italic;':'font-style:normal;'}${e.underline?'text-decoration:underline;':'text-decoration:none;'}`;
   return `
   <div class="event-row" data-event-id="${e.id}">
-    <div class="event-textarea" contenteditable="true" data-field="text" data-placeholder="이 시점에 있었던 사건을 적어주세요" style="${styleStr}">${esc(e.text)}</div>
+    <div class="ce-field event-textarea" contenteditable="true" data-field="text" data-placeholder="이 시점에 있었던 사건을 적어주세요" style="${styleStr}">${esc(e.text)}</div>
     <div class="style-row only-edit">
       <input type="color" class="color-picker" data-field="color" value="${e.color}" title="글자 색상">
       <button type="button" class="style-toggle ${e.bold?'active':''}" data-action="toggle-style" data-style="bold">B</button>
@@ -929,7 +920,6 @@ function renderBlocks(){
     return;
   }
   blocksContainer.innerHTML = state.blocks.map((b,i)=>blockHTML(b,i,i===state.blocks.length-1)).join('');
-  initAffiliationWidths();
 }
 
 /* ================= 경고문구 배너 ================= */
@@ -940,7 +930,7 @@ function warningHTML(w){
     return `
     <div class="warning-banner" data-warning-id="${w.id}">
       <span class="warning-icon">⚠️</span>
-      <input type="text" class="warning-genre-input" data-field="genre" placeholder="장르" value="${esc(w.genre)}" maxlength="20">
+      <div class="ce-field warning-genre-input" contenteditable="true" data-field="genre" data-placeholder="장르">${esc(w.genre)}</div>
       <span>내의 스포일러가 일부 포함되어 있습니다.</span>
       <button type="button" class="warning-remove only-edit" data-action="remove-warning" title="삭제">✕</button>
     </div>`;
@@ -956,13 +946,12 @@ function warningHTML(w){
   return `
   <div class="warning-banner" data-warning-id="${w.id}">
     <span class="warning-icon">⚠️</span>
-    <input type="text" class="warning-custom-input" data-field="text" placeholder="주의 문구를 직접 입력하세요" value="${esc(w.text)}">
+    <div class="ce-field warning-custom-input" contenteditable="true" data-field="text" data-placeholder="주의 문구를 직접 입력하세요">${esc(w.text)}</div>
     <button type="button" class="warning-remove only-edit" data-action="remove-warning" title="삭제">✕</button>
   </div>`;
 }
 function renderWarnings(){
   warningsContainer.innerHTML = state.warnings.map(warningHTML).join('');
-  warningsContainer.querySelectorAll('.warning-genre-input').forEach(el=>autoGrowInput(el, 44, 220, 10));
 }
 warningsContainer.addEventListener('click',(ev)=>{
   const btn = ev.target.closest('[data-action="remove-warning"]');
@@ -978,8 +967,8 @@ warningsContainer.addEventListener('input',(ev)=>{
   const wrap = target.closest('.warning-banner');
   if(!wrap) return;
   const w = state.warnings.find(x=>x.id===wrap.dataset.warningId);
-  if(w) w[field] = target.value;
-  if(field==='genre'){ autoGrowInput(target, 44, 220, 10); }
+  if(w) w[field] = target.isContentEditable ? target.textContent : target.value;
+  normalizeEditableEmpty(target);
 });
 document.getElementById('addSpoilerBtn').onclick = ()=>{ state.warnings.push(newWarning('spoiler')); renderWarnings(); };
 document.getElementById('addTriggerBtn').onclick = ()=>{ state.warnings.push(newWarning('trigger')); renderWarnings(); };
@@ -1008,7 +997,7 @@ function futureNoteHTML(){
         <button type="button" class="btn-icon danger" data-action="remove-future-note" title="삭제">✕</button>
       </div>
     </div>
-    <div class="future-note-textarea" contenteditable="true" data-field="futureText" data-placeholder="이 이후 앞으로의 이야기가 어떻게 될지 적어보세요">${esc(state.futureNote.text)}</div>
+    <div class="ce-field future-note-textarea" contenteditable="true" data-field="futureText" data-placeholder="이 이후 앞으로의 이야기가 어떻게 될지 적어보세요">${esc(state.futureNote.text)}</div>
   </div>`;
 }
 function renderFutureNote(){
@@ -1018,7 +1007,6 @@ function renderFutureNote(){
     futureNoteContainer.innerHTML = `<div class="future-note-add-wrap only-edit"><button type="button" class="btn-secondary" data-action="add-future-note">+ 앞으로의 이야기 추가</button></div>`;
   }
 }
-futureNoteContainer.addEventListener('keydown', handleEditableKeydown);
 futureNoteContainer.addEventListener('click',(ev)=>{
   const btn = ev.target.closest('[data-action]');
   if(!btn) return;
@@ -1059,8 +1047,7 @@ futureNoteContainer.addEventListener('input',(ev)=>{
 /* ================= 제목 (PAIR NAME TIMELINE) ================= */
 const pairNameInput = document.getElementById('pairNameInput');
 pairNameInput.oninput = (e)=>{
-  state.pairName = e.target.value;
-  autoGrowInput(e.target, 60, 480, 14);
+  state.pairName = e.target.textContent;
 };
 document.getElementById('titleFontSelect').onchange = (e)=>{
   state.titleFont = e.target.value;
@@ -1073,7 +1060,6 @@ document.getElementById('titleColorPicker').oninput = (e)=>{
 document.getElementById('themeSelect').onchange = (e)=>{ applyTheme(e.target.value); };
 
 /* ================= 이벤트 위임 ================= */
-blocksContainer.addEventListener('keydown', handleEditableKeydown);
 blocksContainer.addEventListener('click',(ev)=>{
   const btn = ev.target.closest('[data-action]');
   if(!btn) return;
@@ -1226,14 +1212,14 @@ blocksContainer.addEventListener('input',(ev)=>{
 
   if(pcard){
     const p = block.profiles.find(x=>x.id===pcard.dataset.profileId);
-    p[field] = target.value;
+    p[field] = target.isContentEditable ? target.textContent : target.value;
     if(field==='color'){ pcard.querySelector('.profile-fields').style.color = target.value; }
-    if(field==='affiliation'){ autoGrowInput(target); }
+    if(field==='name' || field==='age' || field==='affiliation' || field==='status'){ normalizeEditableEmpty(target); }
   } else if(rrow){
     const r = block.relationships.find(x=>x.id===rrow.dataset.relId);
     r[field] = target.isContentEditable ? target.textContent : target.value;
     if(field==='color'){ rrow.querySelector('.rel-keyword').style.color = target.value; }
-    if(field==='keyword'){ normalizeEditableEmpty(target); }
+    if(field==='keyword' || field==='charA' || field==='charB'){ normalizeEditableEmpty(target); }
   } else if(erow){
     const e = block.events.find(x=>x.id===erow.dataset.eventId);
     e[field] = target.isContentEditable ? target.textContent : target.value;
@@ -1315,17 +1301,10 @@ document.getElementById('bgTypeSelect').onchange = (e)=>{
 document.getElementById('bgColor1').oninput = (e)=>{ state.bgColor1 = e.target.value; applyBackground(); };
 document.getElementById('bgColor2').oninput = (e)=>{ state.bgColor2 = e.target.value; applyBackground(); };
 
-function resizeAllAutoElements(){
-  blocksContainer.querySelectorAll('.p-affiliation').forEach(el=>autoGrowInput(el));
-  warningsContainer.querySelectorAll('.warning-genre-input').forEach(el=>autoGrowInput(el, 44, 220, 10));
-  const pairEl = document.getElementById('pairNameInput');
-  if(pairEl) autoGrowInput(pairEl, 60, 480, 14);
-}
 function applyMode(){
   const canvas = document.getElementById('canvas');
   canvas.classList.toggle('mode-preview', state.mode==='preview');
   document.getElementById('modeToggleBtn').textContent = state.mode==='edit' ? '프리뷰 모드' : '편집 모드로 돌아가기';
-  resizeAllAutoElements();
 }
 document.getElementById('modeToggleBtn').onclick = ()=>{
   state.mode = state.mode==='edit' ? 'preview' : 'edit';
@@ -1339,7 +1318,8 @@ function updateCommissionEmptyState(){
   document.getElementById('commissionPrefix').style.display = empty ? 'none' : 'inline';
 }
 document.getElementById('commissionInput').oninput = (e)=>{
-  state.commissionSource = e.target.value;
+  state.commissionSource = e.target.textContent;
+  normalizeEditableEmpty(e.target);
   updateCommissionEmptyState();
 };
 
@@ -1384,8 +1364,7 @@ function applyAllSettingsToUI(){
   applyThemeVars(state.themeKey || 'pastel');
   document.getElementById('themeSelect').value = state.themeKey || 'pastel';
   document.getElementById('globalFontSelect').innerHTML = fontOptionsHTML(state.globalFont, false);
-  document.getElementById('pairNameInput').value = state.pairName;
-  autoGrowInput(document.getElementById('pairNameInput'), 60, 480, 14);
+  document.getElementById('pairNameInput').textContent = state.pairName;
   document.getElementById('titleFontSelect').innerHTML = fontOptionsHTML(state.titleFont, true);
   document.getElementById('titleColorPicker').value = state.titleColor;
   document.querySelector('.canvas-title').style.fontFamily = state.titleFont ? fontStack(state.titleFont) : '';
@@ -1397,7 +1376,7 @@ function applyAllSettingsToUI(){
   document.getElementById('bgColor1').value = state.bgColor1;
   document.getElementById('bgColor2').value = state.bgColor2;
   document.getElementById('bgColor2').style.display = state.bgType==='gradient' ? 'inline-block' : 'none';
-  document.getElementById('commissionInput').value = state.commissionSource;
+  document.getElementById('commissionInput').textContent = state.commissionSource;
   updateCommissionEmptyState();
   document.getElementById('canvas').style.fontFamily = fontStack(state.globalFont);
   applyBackground();
@@ -1441,11 +1420,6 @@ renderBlocks();
 renderWarnings();
 renderFutureNote();
 applyAllSettingsToUI();
-
-/* 웹폰트가 뒤늦게 로드되어 글자 폭이 바뀌는 경우를 대비해 로드 완료 후 크기를 한 번 더 보정 */
-if(document.fonts && document.fonts.ready){
-  document.fonts.ready.then(()=>{ resizeAllAutoElements(); });
-}
 </script>
 </body>
 </html>
